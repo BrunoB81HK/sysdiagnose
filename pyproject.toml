@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sysdiagnose"
+dynamic = ["version"]
+description = "Forensic toolkit for iOS sysdiagnose feature."
+readme = "README.md"
+requires-python = ">=3.6"
+license = { file = "LICENSE.txt" }
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: European Union Public Licence 1.2 (EUPL 1.2)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
+]
+dependencies = [
+    "argcomplete",
+    "graphviz==0.20.1",
+    "tabulate==0.9.0",
+    "biplist==1.0.3",
+    "python-dateutil==2.8.2",
+    "pyyaml==6.0.1",
+]
+
+[project.urls]
+Documentation = "https://github.com/EC-DIGIT-CSIRC/sysdiagnose/wiki"
+Issues = "https://github.com/EC-DIGIT-CSIRC/sysdiagnose/issues"
+Source = "https://github.com/EC-DIGIT-CSIRC/sysdiagnose"
+
+[project.scripts]
+sysdiagnose = "sysdiagnose.__main__:main"
+
+[tool.hatch]
+
+[tool.hatch.version]
+path = "sysdiagnose/__init__.py"
