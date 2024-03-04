@@ -15,6 +15,7 @@ Options:
   -v --version     Show version.
 """
 import os
+
 # from optparse import OptionParser
 import json
 import ijson
@@ -42,50 +43,50 @@ def apps_analysis(jsondir, filename):
 
     # building data depending on the source
     for jsonfile in jsondir:
-        if jsonfile.endswith('accessibility-tcc.json'):
-            with open(jsonfile, 'r') as f:
+        if jsonfile.endswith("accessibility-tcc.json"):
+            with open(jsonfile, "r") as f:
                 accessibility_data = json.load(f)
-                for entry in accessibility_data['access']:
-                    if entry['client'] not in apps.keys():
-                        apps[entry['client']]= {"found": ['accessibility-tcc'], "services": [entry['service']]}
+                for entry in accessibility_data["access"]:
+                    if entry["client"] not in apps.keys():
+                        apps[entry["client"]] = {"found": ["accessibility-tcc"], "services": [entry["service"]]}
                     else:
-                        apps[entry['client']]["services"].append(entry['service'])
-        elif jsonfile.endswith('brctl.json'):
-            with open(jsonfile, 'r') as f:
+                        apps[entry["client"]]["services"].append(entry["service"])
+        elif jsonfile.endswith("brctl.json"):
+            with open(jsonfile, "r") as f:
                 brctl_data = json.load(f)
                 # directly going to the list of apps
-                for entry in brctl_data['app_library_id'].keys():
+                for entry in brctl_data["app_library_id"].keys():
                     if entry not in apps.keys():
-                        apps[entry]= {"found": ['brctl'], "libraries": brctl_data['app_library_id'][entry]}
+                        apps[entry] = {"found": ["brctl"], "libraries": brctl_data["app_library_id"][entry]}
                     else:
-                        apps[entry]["libraries"] = brctl_data['app_library_id'][entry]
-                        apps[entry]["found"].append('brctl')
-        elif jsonfile.endswith('itunesstore.json'):
-            with open(jsonfile, 'r') as f:
+                        apps[entry]["libraries"] = brctl_data["app_library_id"][entry]
+                        apps[entry]["found"].append("brctl")
+        elif jsonfile.endswith("itunesstore.json"):
+            with open(jsonfile, "r") as f:
                 itunesstore_data = json.load(f)
                 # directly going to the list of apps
-                for entry in itunesstore_data['application_id']:
-                    if entry['bundle_id'] not in apps.keys():
-                        apps[entry['bundle_id']]= {"found": ['itunesstore']}
+                for entry in itunesstore_data["application_id"]:
+                    if entry["bundle_id"] not in apps.keys():
+                        apps[entry["bundle_id"]] = {"found": ["itunesstore"]}
                     else:
-                        apps[entry['bundle_id']]["found"].append('itunesstore')
-        elif jsonfile.endswith('logarchive.json'):
+                        apps[entry["bundle_id"]]["found"].append("itunesstore")
+        elif jsonfile.endswith("logarchive.json"):
             # try something simple
             app_list = []
-            with open(jsonfile, 'rb') as f:
-                for entry in ijson.items(f, 'data.item'):
-                    if 'subsystem' in entry.keys():
-                        if entry['subsystem'] not in app_list and '.' in entry['subsystem']:
-                            if entry['subsystem'].startswith('pid/'):
+            with open(jsonfile, "rb") as f:
+                for entry in ijson.items(f, "data.item"):
+                    if "subsystem" in entry.keys():
+                        if entry["subsystem"] not in app_list and "." in entry["subsystem"]:
+                            if entry["subsystem"].startswith("pid/"):
                                 pass
-                            elif entry['subsystem'].startswith('user/'):
+                            elif entry["subsystem"].startswith("user/"):
                                 pass
                             else:
-                                app_list.append(entry['subsystem'])
-                                if entry['subsystem'] not in apps.keys():
-                                    apps[entry['subsystem']]= {"found": ['logarchive']}
+                                app_list.append(entry["subsystem"])
+                                if entry["subsystem"] not in apps.keys():
+                                    apps[entry["subsystem"]] = {"found": ["logarchive"]}
                                 else:
-                                    apps[entry['subsystem']]["found"].append('logarchive')
+                                    apps[entry["subsystem"]]["found"].append("logarchive")
     print(json.dumps(apps, indent=4))
 
     return
@@ -99,19 +100,20 @@ def apps_analysis(jsondir, filename):
 
 def main():
     """
-        Main function, to be called when used as CLI tool
+    Main function, to be called when used as CLI tool
     """
 
-    arguments = docopt(__doc__, version='parser for com.apple.wifi plist files v0.2')
+    arguments = docopt(__doc__, version="parser for com.apple.wifi plist files v0.2")
 
-    if arguments['-i']:
+    if arguments["-i"]:
         # go through the json files in the folder
         json_files = []
-        for file in os.listdir(arguments['<logfolder>']):
+        for file in os.listdir(arguments["<logfolder>"]):
             if file.endswith(".json"):
-                json_files.append(os.path.join(arguments['<logfolder>'], file))
+                json_files.append(os.path.join(arguments["<logfolder>"], file))
         # call the function to generate the apps analysis
-        apps_analysis(json_files, 'tmp.md')
+        apps_analysis(json_files, "tmp.md")
+
 
 # --------------------------------------------------------------------------- #
 
@@ -121,7 +123,6 @@ def main():
 """
 
 if __name__ == "__main__":
-
     # Create an instance of the Analysis class (called "base") and run main
     main()
 

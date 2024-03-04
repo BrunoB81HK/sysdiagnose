@@ -17,7 +17,7 @@ find .  -type f -name "*.plist" -exec sh -c 'plutil -p $1 > $1.txt'  - {} \;
 
 # Backup the device with libimobile device
 
-To install  
+To install
 ````
 apt-get install libimobiledevice-dev libimobiledevice-doc libimobiledevice6 libplist-doc ideviceinstaller libimobiledevice-utils python-imobiledevice python-plist libplist-utils
 ````

@@ -9,7 +9,6 @@
 # - tree structure
 # - simplified
 #
-import re
 import sys
 import json
 from optparse import OptionParser
@@ -54,9 +53,7 @@ def main():
     usage = "\n%prog -i inputfile\n"
 
     parser = OptionParser(usage=usage)
-    parser.add_option(
-        "-i", dest="inputfile", action="store", type="string", help="ps.txt"
-    )
+    parser.add_option("-i", dest="inputfile", action="store", type="string", help="ps.txt")
     (options, args) = parser.parse_args()
 
     # no arguments given by user, print help and exit

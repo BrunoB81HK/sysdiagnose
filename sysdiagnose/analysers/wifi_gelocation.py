@@ -3,7 +3,6 @@
 # For Python3
 # Author: Aaron Kaplan <aaron@lo-res.org>
 
-import os
 import sys
 import json
 import dateutil.parser
@@ -12,8 +11,8 @@ from optparse import OptionParser
 import gpxpy
 import gpxpy.gpx
 
-sys.path.append('..')   # noqa: E402
-from sysdiagnose import config        # noqa: E402
+sys.path.append("..")  # noqa: E402
+from sysdiagnose import config  # noqa: E402
 
 
 version_string = "demo.py v2023-04-28 Version 0.1"
@@ -34,17 +33,17 @@ def generate_gpx(jsonfile: str, outfile: str = "wifi-geolocations.gpx"):
     ```json
     """
     try:
-        with open(jsonfile, 'r') as fp:
+        with open(jsonfile, "r") as fp:
             json_data = json.load(fp)
     except Exception as e:
         print(f"Error while parsing inputfile JSON. Reason: {str(e)}")
         sys.exit(-1)
 
-    json_entry = json_data.get('com.apple.wifi.known-networks.plist')
+    json_entry = json_data.get("com.apple.wifi.known-networks.plist")
     if not json_entry:
         print("Could not find the 'com.apple.wifi.known-networks.plist' section. Bailing out.", file=sys.stderr)
         sys.exit(-2)
-    json_data = json_entry      # start here
+    json_data = json_entry  # start here
 
     # Create new GPX object
     gpx = gpxpy.gpx.GPX()
@@ -52,45 +51,45 @@ def generate_gpx(jsonfile: str, outfile: str = "wifi-geolocations.gpx"):
     for network_name, network_data in json_data.items():
         ssid = network_name
         # timestamps are always tricky
-        timestamp_str = network_data.get('AddedAt', '')
+        timestamp_str = network_data.get("AddedAt", "")
         if config.debug:
             print(f"AddedAt: {timestamp_str}")
         if not timestamp_str:
-            timestamp_str = network_data.get('JoinedByUserAt', '')      # second best attempt
+            timestamp_str = network_data.get("JoinedByUserAt", "")  # second best attempt
         if not timestamp_str:
-            timestamp_str = network_data.get('UpdatedAt', '')           # third best attempt
+            timestamp_str = network_data.get("UpdatedAt", "")  # third best attempt
         # Convert ISO 8601 format to datetime
-        add_reason = network_data.get("AddReason", '')
+        add_reason = network_data.get("AddReason", "")
 
         try:
             timestamp = dateutil.parser.parse(timestamp_str)
         except Exception as e:
             print(f"Error converting timestamp. Reason: {str(e)}. Timestamp was: {str(timestamp_str)}. Assuming Jan 1st 1970.")
-            timestamp = dateutil.parser.parse('1970-01-01')     # begin of epoch
+            timestamp = dateutil.parser.parse("1970-01-01")  # begin of epoch
 
-        bssid = network_data.get('__OSSpecific__', {}).get('BSSID', '')
-        channel = network_data.get('__OSSpecific__', {}).get('CHANNEL', '')
-        for bss in network_data.get('BSSList', []):
-            lat = bss.get('LocationLatitude', '')
-            lon = bss.get('LocationLongitude', '')
-            location_accuracy = bss.get('LocationAccuracy', '')
+        bssid = network_data.get("__OSSpecific__", {}).get("BSSID", "")
+        channel = network_data.get("__OSSpecific__", {}).get("CHANNEL", "")
+        for bss in network_data.get("BSSList", []):
+            lat = bss.get("LocationLatitude", "")
+            lon = bss.get("LocationLongitude", "")
+            location_accuracy = bss.get("LocationAccuracy", "")
 
             # Create new waypoint
             waypoint = gpxpy.gpx.GPXWaypoint(latitude=lat, longitude=lon, time=timestamp)
             waypoint.name = ssid
-            waypoint.description = f'''BSSID: {bssid}
+            waypoint.description = f"""BSSID: {bssid}
                 Channel: {channel}
                 Timestamp: {timestamp_str}
                 LocationAccuracy: {location_accuracy}
                 Latitude: {lat}
                 Longitude: {lon}
-                Reason for Adding: {add_reason}'''
+                Reason for Adding: {add_reason}"""
 
             # Add waypoint to gpx file
             gpx.waypoints.append(waypoint)
 
         # Save gpx file
-        with open(outfile, 'w') as f:
+        with open(outfile, "w") as f:
             f.write(gpx.to_xml())
     return
 
@@ -99,19 +98,16 @@ def generate_gpx(jsonfile: str, outfile: str = "wifi-geolocations.gpx"):
 """
     Main function
 """
-def main():
 
+
+def main():
     print(f"Running {version_string}\n")
 
     usage = "\n%prog -d JSON directory\n"
 
     parser = OptionParser(usage=usage)
-    parser.add_option("-i", dest="inputfile",
-                      action="store", type="string",
-                      help="JSON file from parsers")
-    parser.add_option("-o", dest="outputfile",
-                      action="store", type="string",
-                      help="GPX file to save output")
+    parser.add_option("-i", dest="inputfile", action="store", type="string", help="JSON file from parsers")
+    parser.add_option("-o", dest="outputfile", action="store", type="string", help="GPX file to save output")
     (options, args) = parser.parse_args()
 
     # no arguments given by user, print help and exit
@@ -131,7 +127,6 @@ def main():
    Call main function
 """
 if __name__ == "__main__":
-
     # Create an instance of the Analysis class (called "base") and run main
     main()
 

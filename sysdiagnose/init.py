@@ -34,7 +34,22 @@ __sysdiagnose_archive_glob_file_map = {
 }
 
 
-def init_main(args: argparse.Namespace) -> int:
+def add_parser(subparsers: argparse._SubParsersAction) -> None:
+    parser = subparsers.add_parser(
+        "init",
+        help="Initialize a sysdiagnose analysis.",
+    )
+    parser.add_argument(
+        "file",
+        metavar="SYSDIAGNOSE_FILE",
+        type=pathlib.Path,
+        help="the sysdiagnose archive file",
+    )
+    parser.add_argument("-f", "--force", action="store_true", help="force the re-initialization")
+    parser.set_defaults(func=main)
+
+
+def main(args: argparse.Namespace) -> int:
     if not args.file.exists():
         logger.error(f"'{args.file.as_posix()}' not found")
         return 1
@@ -90,10 +105,7 @@ def init(sysdiagnose_file: pathlib.Path, force: bool) -> int:
         logger.error(f"Error while decompressing sysdiagnose file. (reason: {e:s})")
 
     # Create case json file.
-    new_case_json = {
-        key: next(new_data_folder.glob(glb), None)
-        for key, glb in __sysdiagnose_archive_glob_file_map.items()
-    }
+    new_case_json = {key: next(new_data_folder.glob(glb), None) for key, glb in __sysdiagnose_archive_glob_file_map.items()}
 
     # Wifi data listing.
     new_case_json["wifi_data"] = [
@@ -103,24 +115,16 @@ def init(sysdiagnose_file: pathlib.Path, force: bool) -> int:
     ]
 
     # ips files.
-    new_case_json["ips_files"] = list(
-        new_data_folder.glob("./*/crashes_and_spins/*.ips")
-    )
+    new_case_json["ips_files"] = list(new_data_folder.glob("./*/crashes_and_spins/*.ips"))
 
     # mobile activation logs.
-    new_case_json["mobile_activation"] = list(
-        new_data_folder.glob("./*/logs/MobileActivation/mobileactivationd.log*")
-    )
+    new_case_json["mobile_activation"] = list(new_data_folder.glob("./*/logs/MobileActivation/mobileactivationd.log*"))
 
     # container manager.
-    new_case_json["container_manager"] = list(
-        new_data_folder.glob("./*/logs/MobileContainerManager/containermanagerd.log*")
-    )
+    new_case_json["container_manager"] = list(new_data_folder.glob("./*/logs/MobileContainerManager/containermanagerd.log*"))
 
     # mobile installation.
-    new_case_json["mobile_installation"] = list(
-        new_data_folder.glob("./*/logs/MobileInstallation/mobile_installation.log*")
-    )
+    new_case_json["mobile_installation"] = list(new_data_folder.glob("./*/logs/MobileInstallation/mobile_installation.log*"))
 
     # Get iOS version
     if ret := re.search(

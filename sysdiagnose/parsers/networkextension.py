@@ -20,6 +20,7 @@ Options:
 # from optparse import OptionParser
 # import plistlib
 import biplist
+
 # import json
 from docopt import docopt
 from tabulate import tabulate
@@ -36,40 +37,40 @@ parser_call = "parseplist"
 
 
 def parseplist(file):
-    with open(file, 'rb') as fp:
+    with open(file, "rb") as fp:
         pl = biplist.readPlist(fp)
         # pl = plistlib.load(fp)
 
-    objects = pl['$objects']
+    objects = pl["$objects"]
 
-    output = {'objects': []}
+    output = {"objects": []}
 
     for object in objects:
         if isinstance(object, str):
-            output['objects'].append(object)
+            output["objects"].append(object)
 
     return output
 
 
 def main():
     """
-        Main function, to be called when used as CLI tool
+    Main function, to be called when used as CLI tool
     """
 
-    arguments = docopt(__doc__, version='parser for networkextension.plist v0.1')
+    arguments = docopt(__doc__, version="parser for networkextension.plist v0.1")
 
-    if arguments['-i']:
+    if arguments["-i"]:
         try:
-            objects = parseplist(arguments['<file>'])
+            objects = parseplist(arguments["<file>"])
 
-            headers = ['Interesting extracted object']
+            headers = ["Interesting extracted object"]
             lines = []
-            for object in objects['objects']:
-                line=[object]
+            for object in objects["objects"]:
+                line = [object]
                 lines.append(line)
             print(tabulate(lines, headers=headers))
         except Exception as e:
-            print(f'Error: {str(e)}')
+            print(f"Error: {str(e)}")
 
     # parseplist("../data/1/sysdiagnose_2019.02.13_15-50-14+0100_iPhone_OS_iPhone_16C101/logs/Networking/com.apple.networkextension.plist")
 
@@ -82,7 +83,6 @@ def main():
    Call main function
 """
 if __name__ == "__main__":
-
     # Create an instance of the Analysis class (called "base") and run main
     main()
 

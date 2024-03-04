@@ -25,7 +25,6 @@ parser_call = "get_powerlogs"
 def get_powerlogs(dbpath, ios_version=13):
     sys.path.append(os.path.abspath("./"))
     sys.path.append(os.path.abspath("../"))
-    from utils import times
     from utils import sqlite2json
 
     powerlogs = sqlite2json.sqlite2struct(dbpath)

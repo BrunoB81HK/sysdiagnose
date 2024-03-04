@@ -40,7 +40,9 @@ cmd_parsing_osx = "/usr/bin/log show %s --style ndjson"  # fastest and short ver
 #       https://github.com/ydkhatri/UnifiedLogReader
 # 3x the same path, last = output
 # XXX #19 FIXME: this currently does not work on Linux. Forget about it for now.
-cmd_parsing_linux = "/usr/bin/python3 /home/david/.local/bin/UnifiedLogReader.py -l INFO -f SQLITE %s %s/timesync/ %s %s"  # FIXME #17 what is that?
+cmd_parsing_linux = (
+    "/usr/bin/python3 /home/david/.local/bin/UnifiedLogReader.py -l INFO -f SQLITE %s %s/timesync/ %s %s"  # FIXME #17 what is that?
+)
 #   -f FORMAT, --output_format FORMAT
 #                        Output format: SQLITE, TSV_ALL, LOG_DEFAULT  (Default is LOG_DEFAULT)
 #  -l LOG_LEVEL, --log_level LOG_LEVEL
@@ -49,9 +51,7 @@ cmd_parsing_linux = "/usr/bin/python3 /home/david/.local/bin/UnifiedLogReader.py
 # --------------------------------------------------------------------------- #
 
 
-def get_logs(
-    filename, ios_version=13, output=None
-):  # FIXME #18 hard coded default version?
+def get_logs(filename, ios_version=13, output=None):  # FIXME #18 hard coded default version?
     """
     Parse the system_logs.logarchive.  When running on OS X, use native tools.
     On other system use a 3rd party library.
@@ -91,14 +91,13 @@ def normalize_unified_logs(filename="./unifiedlogs.sqlite", output=sys.stdout):
     This required to get a SQLITE output from UnifiedLogs
     """
     sys.path.append(os.path.abspath("../"))
-    from utils import times
     from utils import sqlite2json
 
     unifiedlogs = sqlite2json.sqlite2struct(filename)
     try:
         outfd = output
         if output is not sys.stdout:
-            with open(output, "w") as outf:
+            with open(output, "w") as _:
                 outfd.write(sqlite2json.dump2json(unifiedlogs))
     except Exception as e:
         print(f"Impossible to convert {filename} to JSON. Reason: {str(e)}")
@@ -117,9 +116,7 @@ def __execute_cmd_and_get_result(command, filename, outfile=sys.stdout):
     import subprocess
 
     cmd_array = command.split()
-    process = subprocess.Popen(
-        cmd_array, stdout=subprocess.PIPE, universal_newlines=True
-    )
+    process = subprocess.Popen(cmd_array, stdout=subprocess.PIPE, universal_newlines=True)
     result = {"data": []}
     outfd = outfile
     if outfile is not None:  # if none just return the text with return

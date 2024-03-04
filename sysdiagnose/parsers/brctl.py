@@ -17,22 +17,17 @@ Options:
 """
 
 import sys
-from optparse import OptionParser
-import plistlib
 import json
 from docopt import docopt
-from tabulate import tabulate
 import glob
 import re
-import csv
-import io
 
 
 # ----- definition for parsing.py script -----#
 # -----         DO NOT DELETE             ----#
 
 parser_description = "Parsing brctl files"
-parser_input = "brctl"      # folder containing brctl files
+parser_input = "brctl"  # folder containing brctl files
 parser_call = "parsebrctl"
 
 
@@ -40,22 +35,22 @@ def parselistfile(container_list_file):
     containers = {"containers": []}
     result = []
     # print(container_list_file)
-    with open(container_list_file[0], 'r') as f:
-        keys = ['id', 'localizedName', 'documents', 'Public', 'clients']
+    with open(container_list_file[0], "r") as f:
+        keys = ["id", "localizedName", "documents", "Public", "clients"]
         for line in f:
             line = line.strip()
-            line = line.replace('Mobile Documents', 'Mobile_Documents')
-            keys = ['id', 'localizedName', 'documents', 'Public', 'Private', 'clients']
+            line = line.replace("Mobile Documents", "Mobile_Documents")
+            keys = ["id", "localizedName", "documents", "Public", "Private", "clients"]
             values = re.findall(rf"({'|'.join(keys)}):\s*([^ \[]+|\[[^\]]*\])", line)
-            result = {k: v.strip('[]') for k, v in values}
+            result = {k: v.strip("[]") for k, v in values}
             if result != {}:
-                result['documents'] = result['documents'].replace('Mobile_Documents', 'Mobile Documents')
-                containers['containers'].append(result)
+                result["documents"] = result["documents"].replace("Mobile_Documents", "Mobile Documents")
+                containers["containers"].append(result)
         return containers
 
 
 def parsedumpfile(container_dump_file):
-    with open(container_dump_file[0], 'r') as f:
+    with open(container_dump_file[0], "r") as f:
         dump = {}
         section = "header"
         previous_line = ""
@@ -74,7 +69,7 @@ def parsedumpfile(container_dump_file):
 
     # parsing different sections
     # header
-    header = parse_header(dump['header'])
+    header = parse_header(dump["header"])
 
     # boot_history
     # finding key value
@@ -88,18 +83,18 @@ def parsedumpfile(container_dump_file):
     boot_history = parse_boot_history(dump[bhkey])
 
     # server_state
-    server_state = parse_server_state(dump['server_state'])
+    server_state = parse_server_state(dump["server_state"])
 
     # client_state
-    client_state = parse_client_state(dump['client_state'])
+    client_state = parse_client_state(dump["client_state"])
 
     # system
 
-    system = parse_system_scheduler(dump['system'])
+    system = parse_system_scheduler(dump["system"])
 
     # scheduler
 
-    system = parse_system_scheduler(dump['scheduler'])
+    system = parse_system_scheduler(dump["scheduler"])
 
     # containers
     # finding key value
@@ -117,7 +112,7 @@ def parsedumpfile(container_dump_file):
     server_items = parse_server_items(dump[ckey])
 
     # app library IDs by App ID
-    app_library_id, app_ids = parse_apps_monitor(dump['apps monitor'])
+    app_library_id, app_ids = parse_apps_monitor(dump["apps monitor"])
 
     # putting together all the parsed data
 
@@ -130,7 +125,7 @@ def parsedumpfile(container_dump_file):
         "applibrary": applibrary,
         "server_items": server_items,
         "app_library_id": app_library_id,
-        "app_ids": app_ids
+        "app_ids": app_ids,
     }
 
     return result
@@ -165,10 +160,10 @@ def parse_header(header):
     # Check if there is a match
     if match:
         # save the values
-        output['timestamp'] = match.group(1)
-        output['account'] = match.group(2)
-        output['inCarry'] = match.group(3)
-        output['home'] = match.group(4)
+        output["timestamp"] = match.group(1)
+        output["account"] = match.group(2)
+        output["inCarry"] = match.group(3)
+        output["home"] = match.group(4)
 
     # Convert the output dictionary to a JSON string
     output_json = json.dumps(output)
@@ -202,7 +197,7 @@ def parse_line_boot_history(line):
             "OS": match.group(2),
             "CloudDocs": match.group(3),
             "BirdSchema": match.group(4),
-            "DBSchema": match.group(5)
+            "DBSchema": match.group(5),
         }
     else:
         # return None if the line does not match the pattern
@@ -237,7 +232,7 @@ def parse_server_state(server_state):
 
 def parse_client_state(data: str) -> dict:
     # Split the data into lines
-    lines = data.split('\n')
+    lines = data.split("\n")
 
     # Initialize an empty dictionary to store the parsed data
     parsed_data = {}
@@ -245,7 +240,7 @@ def parse_client_state(data: str) -> dict:
     # Iterate over each line in the data
     for line in lines:
         # Use regular expressions to match key-value pairs
-        match = re.match(r'\s*(\w+)\s*=\s*(.*);', line)
+        match = re.match(r"\s*(\w+)\s*=\s*(.*);", line)
         if match:
             key, value = match.groups()
             # Remove any quotes from the value
@@ -266,14 +261,14 @@ def parse_client_state(data: str) -> dict:
 
 def parse_system_scheduler(input):
     data = {}
-    lines = input.split('\n')
+    lines = input.split("\n")
     for line in lines:
         # removing ANSI escape codes
-        line = re.sub(r'\x1b\[[0-9;]*m', '', line)
+        line = re.sub(r"\x1b\[[0-9;]*m", "", line)
         line = line.strip()
-        if line.startswith('+'):
-            key, value = line.split(':', 1)
-            key = key.strip().replace('+', '').strip()
+        if line.startswith("+"):
+            key, value = line.split(":", 1)
+            key = key.strip().replace("+", "").strip()
             value = value.strip()
             data[key] = value
     return data
@@ -283,17 +278,17 @@ def parse_app_library(data):
     lines = data.splitlines()
     matching_lines = [line for line in lines if "+ app library" in line]
 
-    pattern = r'<(.*?)\[(\d+)\].*?ino:(\d+).*?apps:\{(.*?)\}.*?bundles:\{(.*?)\}'
-    matches = re.findall(pattern, '\n'.join(matching_lines))
+    pattern = r"<(.*?)\[(\d+)\].*?ino:(\d+).*?apps:\{(.*?)\}.*?bundles:\{(.*?)\}"
+    matches = re.findall(pattern, "\n".join(matching_lines))
 
     result = []
     for match in matches:
         library = match[0]
-        app_id = match[1]
+        # app_id = match[1]
         ino = match[2]
-        apps = match[3].split('; ')
-        bundles = match[4].split(', ')
-        result.append({'library': library, 'ino': ino, 'apps': apps, 'bundles': bundles})
+        apps = match[3].split("; ")
+        bundles = match[4].split(", ")
+        result.append({"library": library, "ino": ino, "apps": apps, "bundles": bundles})
 
     return result
 
@@ -305,13 +300,13 @@ def parse_server_items(data):
     app_list = []
 
     for line in matching_lines:
-        pattern = r'-+([^\[]+)\[(\d+)\]-+'
+        pattern = r"-+([^\[]+)\[(\d+)\]-+"
         match = re.search(pattern, line)
 
         if match:
             library_name = match.group(1)
             library_id = match.group(2)
-            app_list.append({'library_name': library_name, 'library_id': library_id})
+            app_list.append({"library_name": library_name, "library_id": library_id})
 
     return app_list
 
@@ -321,24 +316,40 @@ def parse_apps_monitor(data):
     parts = data.split("=======================")
 
     # Extract the JSON strings from each part
-    json_str1 = parts[1].strip().replace("=", ":").replace("\\", "").replace(
-        "\"{(n    \"", "[\"").replace("\"n)}\"", "\"]").replace(",n    ", ",").replace(";", ",")
-    json_str2 = parts[2].strip().replace("=", ":").replace("\\", "").replace(
-        "\"{(n    \"", "[\"").replace("\"n)}\"", "\"]").replace(",n    ", ",").replace(";", ",")
+    json_str1 = (
+        parts[1]
+        .strip()
+        .replace("=", ":")
+        .replace("\\", "")
+        .replace('"{(n    "', '["')
+        .replace('"n)}"', '"]')
+        .replace(",n    ", ",")
+        .replace(";", ",")
+    )
+    json_str2 = (
+        parts[2]
+        .strip()
+        .replace("=", ":")
+        .replace("\\", "")
+        .replace('"{(n    "', '["')
+        .replace('"n)}"', '"]')
+        .replace(",n    ", ",")
+        .replace(";", ",")
+    )
 
     # ugly fixes
     last_comma_index = json_str1.rfind(",")
-    json_str1_new = json_str1[:last_comma_index] + json_str1[last_comma_index + 1:]
+    json_str1_new = json_str1[:last_comma_index] + json_str1[last_comma_index + 1 :]
 
     first_brace_index = json_str1_new.find("}")
-    json_str1 = json_str1_new[:first_brace_index + 1]
+    json_str1 = json_str1_new[: first_brace_index + 1]
 
     # ugly fixes
     last_comma_index = json_str2.rfind(",")
-    json_str2_new = json_str2[:last_comma_index] + json_str2[last_comma_index + 1:]
+    json_str2_new = json_str2[:last_comma_index] + json_str2[last_comma_index + 1 :]
 
     first_brace_index = json_str2_new.find("}")
-    json_str2 = json_str2_new[:first_brace_index + 1]
+    json_str2 = json_str2_new[: first_brace_index + 1]
 
     # Load the JSON strings into Python dictionaries
     json1 = json.loads(json_str1)
@@ -348,8 +359,8 @@ def parse_apps_monitor(data):
 
 
 def parsebrctl(brctl_folder):
-    container_list_file = [brctl_folder + '/brctl-container-list.txt']
-    container_dump_file = [brctl_folder + '/brctl-dump.txt']
+    container_list_file = [brctl_folder + "/brctl-container-list.txt"]
+    container_dump_file = [brctl_folder + "/brctl-dump.txt"]
 
     brctl_parsing = {**parselistfile(container_list_file), **parsedumpfile(container_dump_file)}
 
@@ -358,25 +369,25 @@ def parsebrctl(brctl_folder):
 
 def main():
     """
-        Main function, to be called when used as CLI tool
+    Main function, to be called when used as CLI tool
     """
 
     if sys.version_info[0] < 3:
         print("Must be using Python 3! Exiting ...")
         exit(-1)
 
-    arguments = docopt(__doc__, version='parser for brctl files v0.1')
+    arguments = docopt(__doc__, version="parser for brctl files v0.1")
 
-    if arguments['-i']:
+    if arguments["-i"]:
         try:
-            container_list_file = glob.glob(arguments['<logfolder>'] + 'brctl-container-list.txt')
-            container_dump_file = glob.glob(arguments['<logfolder>'] + 'brctl-dump.txt')
+            container_list_file = glob.glob(arguments["<logfolder>"] + "brctl-container-list.txt")
+            container_dump_file = glob.glob(arguments["<logfolder>"] + "brctl-dump.txt")
 
             brctl_parsing = {**parselistfile(container_list_file), **parsedumpfile(container_dump_file)}
 
             print(json.dumps(brctl_parsing, indent=4))
         except Exception as e:
-            print(f'error retrieving log files. Reason: {str(e)}')
+            print(f"error retrieving log files. Reason: {str(e)}")
 
     return
 

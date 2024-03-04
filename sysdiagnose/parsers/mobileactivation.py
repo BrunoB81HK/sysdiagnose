@@ -16,12 +16,8 @@ Options:
   -v --version     Show version.
 """
 
-import sys
-from optparse import OptionParser
-import plistlib
 import json
 from docopt import docopt
-from tabulate import tabulate
 import glob
 import re
 
@@ -41,11 +37,12 @@ parser_call = "parsemobactiv"
 
 
 def month_converter(month):
-    months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
     month = months.index(month) + 1
-    if (month < 10):
+    if month < 10:
         month = f"{month:02d}"
     return month
+
 
 # Day with leading zero if day < 10 function
 # Functtion call: day = day_converter(day)
@@ -53,28 +50,30 @@ def month_converter(month):
 
 def day_converter(day):
     day = int(day)
-    if (day < 10):
+    if day < 10:
         day = f"{day:02d}"
     return day
+
+
 ##
 
 
 def parsemobactiv(loglist):
     events = {"events": []}
     for logfile in loglist:
-        file = open(logfile, 'r', encoding='utf8')
+        file = open(logfile, "r", encoding="utf8")
         # init
-        status = ''
+        status = ""
 
         for line in file:
             # init
             if "____________________ Mobile Activation Startup _____________________" in line.strip():
-                status = 'act_start'
+                status = "act_start"
                 act_lines = []
-            elif "____________________________________________________________________" in line.strip() and status == 'act_start':
-                status = 'act_stop'
-                events['events'].append(buildlogentry_actentry(act_lines))
-            elif status == 'act_start':
+            elif "____________________________________________________________________" in line.strip() and status == "act_start":
+                status = "act_stop"
+                events["events"].append(buildlogentry_actentry(act_lines))
+            elif status == "act_start":
                 act_lines.append(line.strip())
             elif "<notice>" in line.strip():
                 buildlogentry_notice(line.strip())
@@ -84,14 +83,14 @@ def parsemobactiv(loglist):
 
 def buildlogentry_actentry(lines):
     # print(lines)
-    event = {'loglevel': 'debug'}
+    event = {"loglevel": "debug"}
     # get timestamp
     timeregex = re.search(r"(?<=^)(.*)(?= \[)", lines[0])
     timestamp = timeregex.group(1)
-    weekday, month, day, time, year = (str.split(timestamp))
+    weekday, month, day, time, year = str.split(timestamp)
     day = day_converter(day)
     month = month_converter(month)
-    event['timestamp'] = str(year)+ '-'+ str(month) + '-' + str(day) + ' ' + str(time)
+    event["timestamp"] = str(year) + "-" + str(month) + "-" + str(day) + " " + str(time)
 
     # build event
     for line in lines:
@@ -103,48 +102,48 @@ def buildlogentry_actentry(lines):
 
 
 def buildlogentry_notice(line):
-    event = {'loglevel': 'notice'}
+    event = {"loglevel": "notice"}
     # get timestamp
     timeregex = re.search(r"(?<=^)(.*)(?= \[)", line)
     timestamp = timeregex.group(1)
-    weekday, month, day, time, year = (str.split(timestamp))
+    weekday, month, day, time, year = str.split(timestamp)
     day = day_converter(day)
     month = month_converter(month)
-    event['timestamp'] = str(year)+ '-'+ str(month) + '-' + str(day) + ' ' + str(time)
+    event["timestamp"] = str(year) + "-" + str(month) + "-" + str(day) + " " + str(time)
 
     # hex_ID
     hexIDregex = re.search(r"\(0x(.*?)\)", line)
-    event['hexID'] = '0x' + hexIDregex.group(1)
+    event["hexID"] = "0x" + hexIDregex.group(1)
 
     # event_type
     eventyperegex = re.search(r"\-\[(.*)(\]\:)", line)
     if eventyperegex:
-        event['event_type'] = eventyperegex.group(1)
+        event["event_type"] = eventyperegex.group(1)
 
     # msg
-    if 'event_type' in event:
+    if "event_type" in event:
         msgregex = re.search(r"\]\:(.*)", line)
-        event['msg'] = msgregex.group(1)
+        event["msg"] = msgregex.group(1)
     else:
         msgregex = re.search(r"\)\ (.*)", line)
-        event['msg'] = msgregex.group(1)
+        event["msg"] = msgregex.group(1)
 
     return event
 
 
 def main():
     """
-        Main function, to be called when used as CLI tool
+    Main function, to be called when used as CLI tool
     """
 
-    arguments = docopt(__doc__, version='parser for mobile_installation log files v0.1')
+    arguments = docopt(__doc__, version="parser for mobile_installation log files v0.1")
 
-    loglist=[]
+    loglist = []
 
-    if arguments['-i']:
+    if arguments["-i"]:
         # list files in folder and build list object
         # try:
-        loglist = glob.glob(arguments['<logfolder>'] + '/mobileactivationd.log*')
+        loglist = glob.glob(arguments["<logfolder>"] + "/mobileactivationd.log*")
         print(json.dumps(parsemobactiv(loglist), indent=4))
 
     return 0
@@ -154,6 +153,5 @@ def main():
    Call main function
 """
 if __name__ == "__main__":
-
     # Create an instance of the Analysis class (called "base") and run main
     main()

@@ -16,11 +16,7 @@ Options:
   -v --version     Show version.
 """
 
-import sys
-from optparse import OptionParser
 import plistlib
-import json
-import pprint
 from docopt import docopt
 from tabulate import tabulate
 
@@ -36,12 +32,12 @@ parser_call = "parseplist"
 
 
 def parseplist(file):
-    with open(file, 'rb') as fp:
+    with open(file, "rb") as fp:
         pl = plistlib.load(fp)
 
     # pprint.pprint(pl)
 
-    return pl['app-rules']
+    return pl["app-rules"]
 
     # objects = pl['$objects']
 
@@ -54,10 +50,10 @@ def parseplist(file):
 
 def main():
     """
-        Main function, to be called when used as CLI tool
+    Main function, to be called when used as CLI tool
     """
 
-    arguments = docopt(__doc__, version='parser for networkextensioncache.plist v0.1')
+    arguments = docopt(__doc__, version="parser for networkextensioncache.plist v0.1")
 
     ### test
     # if arguments['-i'] == True:
@@ -65,18 +61,18 @@ def main():
     #    sys.exit()
     ### test
 
-    if arguments['-i']:
+    if arguments["-i"]:
         try:
-            apprules = parseplist(arguments['<file>'])
+            apprules = parseplist(arguments["<file>"])
 
-            headers = ['App', 'UUIDs']
+            headers = ["App", "UUIDs"]
             lines = []
             for key, val in apprules.items():
-                line=[key, val]
+                line = [key, val]
                 lines.append(line)
             print(tabulate(lines, headers=headers))
         except Exception as e:
-            print(f'Error: {str(e)}')
+            print(f"Error: {str(e)}")
 
     # parseplist("../data/1/sysdiagnose_2019.02.13_15-50-14+0100_iPhone_OS_iPhone_16C101/logs/Networking/com.apple.networkextension.plist")
 
@@ -89,7 +85,6 @@ def main():
    Call main function
 """
 if __name__ == "__main__":
-
     # Create an instance of the Analysis class (called "base") and run main
     main()
 

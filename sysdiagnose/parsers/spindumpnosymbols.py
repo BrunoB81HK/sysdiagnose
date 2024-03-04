@@ -17,13 +17,9 @@ Options:
 """
 
 import sys
-from optparse import OptionParser
-import plistlib
 import json
 from docopt import docopt
-from tabulate import tabulate
 import re
-import pprint
 
 # ----- definition for parsing.py script -----#
 # -----         DO NOT DELETE             ----#
@@ -36,32 +32,36 @@ parser_call = "parsespindumpNS"
 
 
 def parsespindumpNS(file):
-    with open(file, 'r') as f_in:
+    with open(file, "r") as f_in:
         # init section
         headers = []
         processes_raw = []
-        status = 'headers'
+        status = "headers"
 
         # stripping
         for line in f_in:
-            if line.strip() == "" or line.strip() == "Heavy format: stacks are sorted by count" or line.strip() == "Use -i and -timeline to re-report with chronological sorting":
+            if (
+                line.strip() == ""
+                or line.strip() == "Heavy format: stacks are sorted by count"
+                or line.strip() == "Use -i and -timeline to re-report with chronological sorting"
+            ):
                 continue
             elif line.strip() == "------------------------------------------------------------":
-                status = 'processes_raw'
+                status = "processes_raw"
                 continue
             elif line.strip() == "Spindump binary format":
-                status = 'binary'
+                status = "binary"
                 continue
-            elif status == 'headers':
+            elif status == "headers":
                 headers.append(line.strip())
                 continue
-            elif status == 'processes_raw':
+            elif status == "processes_raw":
                 processes_raw.append(line.strip())
                 continue
 
         # call parsing function per section
         output = parse_basic(headers)
-        output['processes'] = parse_processes(processes_raw)
+        output["processes"] = parse_processes(processes_raw)
 
     return output
 
@@ -96,7 +96,7 @@ def parse_processes(data):
 
 def parse_process(data):
     # init
-    status = 'infos'
+    status = "infos"
     infos = []
     threads = []
     images = []
@@ -118,8 +118,8 @@ def parse_process(data):
             images.append(line.strip())
             continue
     process = parse_basic(infos)
-    process['threads'] = parse_threads(threads)
-    process['images'] = parse_images(images)
+    process["threads"] = parse_threads(threads)
+    process["images"] = parse_images(images)
 
     return process
 
@@ -148,18 +148,18 @@ def parse_thread(data):
     # parse first line
     # Thread Hex value
     threadHEXregex = re.search(r"Thread 0x..", data[0])
-    output['thread'] = threadHEXregex.group(0).split(" ", 1)[1]
+    output["thread"] = threadHEXregex.group(0).split(" ", 1)[1]
     # Thread Name / DispatchQueue
-    if "DispatchQueue \"" in data[0]:
+    if 'DispatchQueue "' in data[0]:
         dispacthregex = re.search(r"DispatchQueue(.*)\"\(", data[0])
-        output['DispatchQueue'] = dispacthregex.group(0).split("\"")[1]
-    if "Thread name \"" in data[0]:
+        output["DispatchQueue"] = dispacthregex.group(0).split('"')[1]
+    if 'Thread name "' in data[0]:
         dispacthregex = re.search(r"Thread name\ \"(.*)\"", data[0])
-        output['ThreadName'] = dispacthregex.group(0).split("\"")[1]
+        output["ThreadName"] = dispacthregex.group(0).split('"')[1]
     # priority
     if "priority" in data[0]:
         priorityregex = re.search(r"priority\ [0-9]+", data[0])
-        output['priority'] = priorityregex.group(0).split(" ", 1)[1]
+        output["priority"] = priorityregex.group(0).split(" ", 1)[1]
     if "cpu time" in data[0]:
         cputimeregex = re.search(r"cpu\ time\ (.*)\)", data[0])
         output["cputime"] = cputimeregex.group(0).split("time ", 1)[1]
@@ -167,7 +167,7 @@ def parse_thread(data):
     output["loaded"] = []
 
     for line in data[1:]:
-        loaded={}
+        loaded = {}
         if "+" in line:
             loaded["library"] = line.split("(", 1)[1].split("+", 1)[0].strip()
             loaded["int"] = line.split("(", 1)[1].split("+", 1)[1].split(")", 1)[0].strip()
@@ -179,18 +179,18 @@ def parse_thread(data):
 
 
 def parse_images(data):
-    images=[]
+    images = []
     for line in data:
         image = {}
         if line.strip() is not None:
-            clean = ' '.join(line.split(" ")).split()
-            image['start'] = clean[0]
-            image['end'] = clean[2]
-            image['image'] = clean[3]
-            image['UUID'] = clean[4][1:-1]
+            clean = " ".join(line.split(" ")).split()
+            image["start"] = clean[0]
+            image["end"] = clean[2]
+            image["image"] = clean[3]
+            image["UUID"] = clean[4][1:-1]
             try:
-                image['path'] = clean[5]
-            except:     # noqa E722
+                image["path"] = clean[5]
+            except:  # noqa E722
                 pass
             images.append(image)
     return images
@@ -198,15 +198,15 @@ def parse_images(data):
 
 def main():
     """
-        Main function, to be called when used as CLI tool
+    Main function, to be called when used as CLI tool
     """
 
-    arguments = docopt(__doc__, version='parser for networkextension.plist v0.1')
+    arguments = docopt(__doc__, version="parser for networkextension.plist v0.1")
 
     ### test
-    if arguments['-i']:
+    if arguments["-i"]:
         # Output is good enough, just print
-        print(json.dumps(parsespindumpNS(arguments['<file>']), indent=4))
+        print(json.dumps(parsespindumpNS(arguments["<file>"]), indent=4))
         sys.exit()
     ### test
 
@@ -219,7 +219,6 @@ def main():
    Call main function
 """
 if __name__ == "__main__":
-
     # Create an instance of the Analysis class (called "base") and run main
     main()
 

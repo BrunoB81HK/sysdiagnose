@@ -4,13 +4,8 @@
 # Script to print WIFI info from ./WiFi/security.txt
 # Author: david@autopsit.org
 
-import os
 import sys
-import json
 from optparse import OptionParser
-import time
-import struct
-import datetime
 
 version_string = "wifisecurity.py v2023-04-26 Version 1.0"
 

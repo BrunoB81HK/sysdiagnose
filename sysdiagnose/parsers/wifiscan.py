@@ -16,9 +16,6 @@ Options:
   -v --version     Show version.
 """
 
-import sys
-from optparse import OptionParser
-import plistlib
 import json
 from docopt import docopt
 import glob
@@ -32,45 +29,49 @@ parser_call = "parsewifiscan"
 
 # --------------------------------------------------------------------------- #
 
+
 def parsewifiscan(wifi_data):
     output = []
     for data in wifi_data:
-        if data.endswith('.txt'):
-            print('parsing: ' + data)
-            with open(data, 'r') as f:
+        if data.endswith(".txt"):
+            print("parsing: " + data)
+            with open(data, "r") as f:
                 for line in f:
                     if line.strip():
-                        content = line.split(',')
+                        content = line.split(",")
                         # check if the first entry of the dict contains the ssid
-                        if 'ssid=' in content[0]:
+                        if "ssid=" in content[0]:
                             parsed_data = {}
                             for item in content:
                                 key_value = item.split("=")
                                 parsed_data[key_value[0].strip()] = key_value[1]
                             # cleaning SSID entries
                             for key in parsed_data.copy().keys():
-                                if ' - ssid' in key:
-                                    up_parsed_data = {'ssid': re.sub(' - ssid', '', key), 'ssid_hex': parsed_data[key]}
+                                if " - ssid" in key:
+                                    up_parsed_data = {"ssid": re.sub(" - ssid", "", key), "ssid_hex": parsed_data[key]}
                                     del parsed_data[key]
                                     up_parsed_data.update(parsed_data)
                                     parsed_data = up_parsed_data
                             output.append(parsed_data)
     return output
 
+
 # --------------------------------------------------------------------------- #
+
 
 def main():
     """
-        Main function, to be called when used as CLI tool
+    Main function, to be called when used as CLI tool
     """
 
-    arguments = docopt(__doc__, version='parser for wifi_scan files v0.3')
+    arguments = docopt(__doc__, version="parser for wifi_scan files v0.3")
 
-    if arguments['-i']:
+    if arguments["-i"]:
         # list scan files in folder and build a list
-        scanlist = glob.glob(arguments['<logfolder>'] + '/wifi_scan*.txt')
+        scanlist = glob.glob(arguments["<logfolder>"] + "/wifi_scan*.txt")
         output = parsewifiscan(scanlist)
         print(json.dumps(output, indent=4))
+
 
 # --------------------------------------------------------------------------- #
 
@@ -79,7 +80,6 @@ def main():
    Call main function
 """
 if __name__ == "__main__":
-
     # Create an instance of the Analysis class (called "base") and run main
     main()
 

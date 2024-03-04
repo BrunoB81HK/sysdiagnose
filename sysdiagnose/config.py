@@ -37,9 +37,7 @@ if not cases_file.exists():
 logger = logging.getLogger("sysdiagnose")
 logger.setLevel(logging.DEBUG)
 
-formatter = logging.Formatter(
-    "[%(asctime)s] - [%(levelname)s] - [%(name)s]: %(message)s"
-)
+formatter = logging.Formatter("[%(asctime)s] - [%(levelname)s] - [%(name)s]: %(message)s")
 
 file_handler = logging.FileHandler(log_file)
 file_handler.setLevel(logging.DEBUG)

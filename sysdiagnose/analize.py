@@ -6,7 +6,29 @@ from . import config
 logger = config.logger.getChild(__name__)
 
 
-def analyse_main(args: argparse.Namespace) -> int:
+def add_parser(subparsers: argparse._SubParsersAction) -> None:
+    parser = subparsers.add_parser(
+        "analyse",
+        help="Analyse the results produced by parsers.",
+    )
+    parser.add_argument(
+        "case_id",
+        metavar="ID",
+        type=str,
+        choices=["a", "b"],
+        help="the case to analyse",
+    )
+    parser.add_argument(
+        "analizer",
+        type=str,
+        nargs="+",
+        choices=["all", ""],
+        help="the analizer(s) to use",
+    )
+    parser.set_defaults(func=main)
+
+
+def main(args: argparse.Namespace) -> int:
     return 0
 
 

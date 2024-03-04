@@ -4,13 +4,8 @@
 # Demo blank parsers
 # Author: david@autopsit.org
 
-import os
 import sys
-import json
 from optparse import OptionParser
-import time
-import struct
-import datetime
 
 version_string = "demo-parser.py v2023-04-26 Version 1.0"
 
@@ -46,9 +41,7 @@ def main():
     usage = "\n%prog -i inputfile\n"
 
     parser = OptionParser(usage=usage)
-    parser.add_option(
-        "-i", dest="inputfile", action="store", type="string", help="Demo file to use"
-    )
+    parser.add_option("-i", dest="inputfile", action="store", type="string", help="Demo file to use")
     (options, args) = parser.parse_args()
 
     # no arguments given by user, print help and exit

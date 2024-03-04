@@ -21,8 +21,8 @@ version_string = "sqlite2json.py v2020-02-18 Version 1.0"
 
 def sqlite2struct(dbpath):
     """
-        Transform a SQLite DB to a Python struct.
-        If any exception, return None
+    Transform a SQLite DB to a Python struct.
+    If any exception, return None
     """
     try:
         dbstruct = {}
@@ -77,6 +77,7 @@ def dump2json(dbstruct, jsonpath="./db.json"):
         print(f"Impossible to dump the UUID to Path to {jsonpath}. Reason: {str(e)}\n", file=sys.stderr)
     return jsontxt
 
+
 # --------------------------------------------------------------------------- #
 
 
@@ -88,9 +89,7 @@ def main():
     usage = "\n%prog -i inputfile\n"
 
     parser = OptionParser(usage=usage)
-    parser.add_option("-i", dest="inputfile",
-                      action="store", type="string",
-                      help="SQlite DB To Be Printed")
+    parser.add_option("-i", dest="inputfile", action="store", type="string", help="SQlite DB To Be Printed")
     (options, args) = parser.parse_args()
 
     # no arguments given by user, print help and exit
@@ -107,7 +106,6 @@ def main():
    Call main function
 """
 if __name__ == "__main__":
-
     # Create an instance of the Analysis class (called "base") and run main
     main()
 

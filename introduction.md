@@ -1,6 +1,6 @@
 - Introduction
 
-The analysis of iOS devices for incident response is per essence challenging.  
+The analysis of iOS devices for incident response is per essence challenging.
 
 Usual acquisition tool only collect users data while the interest of the analyst reside in what the system is doing.
 The usual way to get access to the full device is by jailbreaking the device or using specialised tools reserved for law enforcement.
@@ -74,4 +74,4 @@ The sysdiagnose process raise a few issues and concerns:
 In this last section we discuss how the integrity can be checked by using more intrusives methods that could be assimilated to a jailbreak.  While those techniques give a full access it also question the value of the result from a forensic perspective and the trust that remains into the device after this rather intrusive process.
 
 
-- Conclusion and references 
+- Conclusion and references

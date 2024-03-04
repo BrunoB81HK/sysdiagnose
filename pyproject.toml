@@ -39,6 +39,10 @@ Source = "https://github.com/EC-DIGIT-CSIRC/sysdiagnose"
 [project.scripts]
 sysdiagnose = "sysdiagnose.__main__:main"
 
+[tool.ruff]
+line-length = 132
+
+
 [tool.hatch]
 
 [tool.hatch.version]

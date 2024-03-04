@@ -8,12 +8,9 @@
 # PID: encoded in Litlle Endian??
 # TODO - add support of iOS13...
 
-import os
 import sys
 import json
 from optparse import OptionParser
-import time
-import struct
 import datetime
 import sqlite3
 
@@ -41,15 +38,11 @@ def print_appinstall_ios12(dbpath):
     try:
         appinstalldb = sqlite3.connect(dbpath)
         cursor = appinstalldb.cursor()
-        for row in cursor.execute(
-            "SELECT pid, bundle_id, install_date FROM app_updates"
-        ):
+        for row in cursor.execute("SELECT pid, bundle_id, install_date FROM app_updates"):
             [pid, bundle_id, install_date] = row
 
             # convert install_date from Cocoa EPOCH -> UTC
-            epoch = (
-                install_date + 978307200
-            )  # difference between COCOA and UNIX epoch is 978307200 seconds
+            epoch = install_date + 978307200  # difference between COCOA and UNIX epoch is 978307200 seconds
             utctime = datetime.datetime.utcfromtimestamp(epoch)
 
             # convert PID
@@ -62,7 +55,6 @@ def print_appinstall_ios12(dbpath):
 
 
 def get_appinstallation_ios13(dbpath):
-    from utils import times
     from utils import sqlite2json
 
     appinstallation = sqlite2json.sqlite2struct(dbpath)

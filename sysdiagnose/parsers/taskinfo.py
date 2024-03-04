@@ -9,7 +9,6 @@
 #
 import re
 import sys
-import json
 from optparse import OptionParser
 
 version_string = "taskinfo.py v2020-02-07 Version 1.0"
@@ -166,23 +165,15 @@ def parse_task_block(fd, current_threat_id, ios_version=13):
         elif line.startswith("req workqueue/pthread overrides:"):
             continue
         elif line.startswith("req legacy qos override:"):
-            result["requested policy"]["req workqueue/pthread overrides"][
-                "req legacy qos override"
-            ] = line.split()[4][:-1]
+            result["requested policy"]["req workqueue/pthread overrides"]["req legacy qos override"] = line.split()[4][:-1]
         elif line.startswith("req workqueue qos override:"):
-            result["requested policy"]["req workqueue/pthread overrides"][
-                "req workqueue qos override"
-            ] = line.split()[4][:-1]
+            result["requested policy"]["req workqueue/pthread overrides"]["req workqueue qos override"] = line.split()[4][:-1]
         elif line.startswith("req kevent overrides:"):
             result["requested policy"]["req kevent overrides"] = line.split()[3][:-1]
         elif line.startswith("req workloop servicer override:"):
-            result["requested policy"]["req workloop servicer override"] = line.split()[
-                4
-            ][:-1]
+            result["requested policy"]["req workloop servicer override"] = line.split()[4][:-1]
         elif line.startswith("req turnstiles sync promotion qos:"):
-            result["requested policy"][
-                "req turnstiles sync promotion qos"
-            ] = line.split()[5][:-1]
+            result["requested policy"]["req turnstiles sync promotion qos"] = line.split()[5][:-1]
         elif line.startswith("req latency qos:"):
             result["requested policy"]["req latency qos"] = line.split()[3][:-1]
         elif line.startswith("req thruput qos:"):
@@ -219,9 +210,7 @@ def parse_task_block(fd, current_threat_id, ios_version=13):
         elif line.startswith("req kevent overrides:"):
             result["req kernel overrides"]["eq kevent overrides"] = line.split()[3:]
         elif line.startswith("req workloop servicer override:"):
-            result["req kernel overrides"][
-                "req workloop servicer override"
-            ] = line.split()[4:]
+            result["req kernel overrides"]["req workloop servicer override"] = line.split()[4:]
 
         # Other
         elif line.startswith("req other:"):
@@ -229,9 +218,7 @@ def parse_task_block(fd, current_threat_id, ios_version=13):
 
         # Handline unknown
         else:
-            print(
-                f"WARNING: Unexpected line detected for tasks: {current_threat_id} ({line})"
-            )
+            print(f"WARNING: Unexpected line detected for tasks: {current_threat_id} ({line})")
             continue  # unknown line
 
     return result
@@ -244,16 +231,12 @@ def search_task_block(fd, ios_version):
             line = line.strip()
             if line.startswith("thread ID:"):
                 current_threatID = line.split()[2]
-                result[current_threatID] = parse_task_block(
-                    fd, current_threatID, ios_version
-                )
+                result[current_threatID] = parse_task_block(fd, current_threatID, ios_version)
             else:
                 continue
 
     except Exception as e:
-        print(
-            f"An unknown error occurs while searching for task block. Reason: {str(e)}"
-        )
+        print(f"An unknown error occurs while searching for task block. Reason: {str(e)}")
 
     return result
 
@@ -279,7 +262,7 @@ def get_tasks(filename, ios_version=13):
             else:
                 continue
         fd.close()
-    except Exception as e:
+    except Exception:
         print(f"Could not open {filename}")
 
     return {"numb_tasks": numb_tasks, "tasks": tasks}
@@ -299,9 +282,7 @@ def main():
     usage = "\n%prog -i inputfile\n"
 
     parser = OptionParser(usage=usage)
-    parser.add_option(
-        "-i", dest="inputfile", action="store", type="string", help="taskinfo.txt"
-    )
+    parser.add_option("-i", dest="inputfile", action="store", type="string", help="taskinfo.txt")
     (options, args) = parser.parse_args()
 
     # no arguments given by user, print help and exit

@@ -44,9 +44,7 @@ def parse_ps(filename, ios_version=16):
             USER  UID PRSNA   PID  PPID        F  %CPU %MEM PRI NI      VSZ    RSS WCHAN    TT  STAT STARTED      TIME COMMAND
             root  0     -     1     0     4004   0.0  0.0   0  0        0      0 -        ??  ?s   Tue09PM   0:00.00 /sbin/launchd
             """
-            patterns = re.split(
-                r"\s+", line
-            )  # XXX FIXME? don't we need a \r" string here for the regexp?
+            patterns = re.split(r"\s+", line)  # XXX FIXME? don't we need a \r" string here for the regexp?
             # key of hash table is PID
             if ios_version < 16:
                 processes[int(patterns[2])] = {
@@ -120,7 +118,7 @@ def export_to_json(processes, filename="./ps.json"):
 def export_as_tree(processes, with_graph=False):
     ppid = {}
     for pid in processes.keys():
-        if not processes[pid]["PPID"] in ppid.keys():  # not an already a known PPID
+        if processes[pid]["PPID"] not in ppid.keys():  # not an already a known PPID
             ppid[processes[pid]["PPID"]] = []  # create an empty array
         ppid[processes[pid]["PPID"]].append(processes[pid])
 
@@ -144,12 +142,9 @@ def _print_tree(ppid, node=0, depth=0):
     for process in ppid[node]:
         print(
             depth * "    "
-            + "%s (PID: %d, PPID: %d, USER: %s)"
-            % (process["COMMAND"], process["PID"], process["PPID"], process["USER"])
+            + "%s (PID: %d, PPID: %d, USER: %s)" % (process["COMMAND"], process["PID"], process["PPID"], process["USER"])
         )
-        ppid = _print_tree(
-            ppid, process["PID"], depth + 1
-        )  # recurse on childs of current process
+        ppid = _print_tree(ppid, process["PID"], depth + 1)  # recurse on childs of current process
     del ppid[node]  # remove the current child from process
 
     # return
@@ -185,9 +180,7 @@ def main():
     usage = "\n%prog -i inputfile\n"
 
     parser = OptionParser(usage=usage)
-    parser.add_option(
-        "-i", dest="inputfile", action="store", type="string", help="ps.txt"
-    )
+    parser.add_option("-i", dest="inputfile", action="store", type="string", help="ps.txt")
     (options, args) = parser.parse_args()
 
     # no arguments given by user, print help and exit

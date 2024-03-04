@@ -4,10 +4,7 @@
 # DEMO - Skeleton
 # Author: david@autopsit.org
 
-import os
 import sys
-import json
-from datetime import datetime
 from optparse import OptionParser
 
 version_string = "demo.py v2023-04-28 Version 0.1"
@@ -32,8 +29,9 @@ def generate_something(jsondir, filename):
 """
     Main function
 """
-def main():
 
+
+def main():
     if sys.version_info[0] < 3:
         print("Must be using Python 3! Exiting ...")
         exit(-1)
@@ -43,12 +41,8 @@ def main():
     usage = "\n%prog -d JSON directory\n"
 
     parser = OptionParser(usage=usage)
-    parser.add_option("-d", dest="inputdir",
-                      action="store", type="string",
-                      help="Directory containing JSON from parsers")
-    parser.add_option("-o", dest="outputfile",
-                      action="store", type="string",
-                      help="JSON file to save output")
+    parser.add_option("-d", dest="inputdir", action="store", type="string", help="Directory containing JSON from parsers")
+    parser.add_option("-o", dest="outputfile", action="store", type="string", help="JSON file to save output")
     (options, args) = parser.parse_args()
 
     # no arguments given by user, print help and exit
@@ -72,7 +66,6 @@ def main():
    Call main function
 """
 if __name__ == "__main__":
-
     # Create an instance of the Analysis class (called "base") and run main
     main()
 

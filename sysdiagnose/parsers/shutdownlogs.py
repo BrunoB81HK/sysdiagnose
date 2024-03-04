@@ -43,13 +43,13 @@ def parse_shutdownlog(filepath, ios_version=16):
         # look for begining of shutdown sequence
         if CLIENTS_ARE_STILL_HERE_LINE in log_lines[index]:
             running_processes = []
-            while not (SIGTERM_LINE in log_lines[index]):
+            while SIGTERM_LINE not in log_lines[index]:
                 if REMAINING_CLIENT_PID_LINE in log_lines[index]:
                     result = re.search(r".*: (\b\d+) \((.*)\).*", log_lines[index])
                     pid = result.groups()[0]
                     binary_path = result.groups()[1]
                     process = pid + ":" + binary_path
-                    if not (process in running_processes):
+                    if process not in running_processes:
                         running_processes.append(process)
                 index += 1
             # compute timestamp from SIGTERM line
@@ -59,9 +59,7 @@ def parse_shutdownlog(filepath, ios_version=16):
             # add entries
             parsed_data[time] = []
             for p in running_processes:
-                parsed_data[time].append(
-                    {"pid": p.split(":")[0], "path": p.split(":")[1]}
-                )
+                parsed_data[time].append({"pid": p.split(":")[0], "path": p.split(":")[1]})
         index += 1
 
     json_object["data"] = parsed_data

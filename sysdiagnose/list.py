@@ -9,7 +9,25 @@ from . import config
 logger = config.logger.getChild(__name__)
 
 
-def list_main(args: argparse.Namespace) -> int:
+def add_parser(subparsers: argparse._SubParsersAction) -> None:
+    parser = subparsers.add_parser(
+        "list",
+        help="List the cases, parsers or analizers of the project.",
+    )
+    parser.add_argument(
+        "item",
+        type=str,
+        choices=[
+            "cases",
+            "parsers",
+            "analysers",
+        ],
+        help="the item to list",
+    )
+    parser.set_defaults(func=main)
+
+
+def main(args: argparse.Namespace) -> int:
     if args.item == "cases":
         return list_cases()
     elif args.item == "parsers":
@@ -17,9 +35,7 @@ def list_main(args: argparse.Namespace) -> int:
     elif args.item == "analysers":
         return list_analysers()
 
-    logger.error(
-        f"'{args.item:s}' is not a valid item to list. {{ cases | parsers | analysers }}"
-    )
+    logger.error(f"'{args.item:s}' is not a valid item to list. {{ cases | parsers | analysers }}")
     return 1
 
 
@@ -27,10 +43,7 @@ def list_cases() -> int:
     headers = ("ID", "Source file", "SHA256")
 
     cases = yaml.safe_load(config.cases_file.read_text())["cases"]
-    lines = [
-        (case_id, case_info["source_file"], case_info["source_sha256"])
-        for case_id, case_info in cases.items()
-    ]
+    lines = [(case_id, case_info["source_file"], case_info["source_sha256"]) for case_id, case_info in cases.items()]
 
     print(tabulate.tabulate(lines, headers=headers))
     return 0
