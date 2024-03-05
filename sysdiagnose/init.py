@@ -9,7 +9,7 @@ import yaml
 from . import config
 
 
-logger = config.logger.getChild(__name__)
+logger = config.logger.getChild("init")
 
 __sysdiagnose_archive_glob_file_map = {
     "sysdiagnose.log": "./*/sysdiagnose.log",

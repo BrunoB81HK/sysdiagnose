@@ -3,10 +3,11 @@ import signal
 
 from . import __version__
 
+from .analize import add_parser as add_analyse_parser
+from .clear import add_parser as add_clear_parser
 from .init import add_parser as add_init_parser
 from .list import add_parser as add_list_parser
 from .parse import add_parser as add_parse_parser
-from .analize import add_parser as add_analyse_parser
 
 
 def main() -> None:
@@ -19,10 +20,11 @@ def main() -> None:
 
     # Register command parsers.
     subparsers = main_parser.add_subparsers(title="commands")
+    add_analyse_parser(subparsers)
+    add_clear_parser(subparsers)
     add_init_parser(subparsers)
     add_list_parser(subparsers)
     add_parse_parser(subparsers)
-    add_analyse_parser(subparsers)
 
     # Register the autocomplete.
     try:

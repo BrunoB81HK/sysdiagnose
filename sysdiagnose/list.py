@@ -6,7 +6,7 @@ import yaml
 from . import config
 
 
-logger = config.logger.getChild(__name__)
+logger = config.logger.getChild("list")
 
 
 def add_parser(subparsers: argparse._SubParsersAction) -> None:

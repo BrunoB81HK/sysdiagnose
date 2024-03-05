@@ -1,5 +1,4 @@
 import argparse
-import json
 import os
 import sys
 import importlib.util
@@ -10,7 +9,7 @@ import yaml
 from . import config
 
 
-logger = config.logger.getChild(__name__)
+logger = config.logger.getChild("parse")
 
 
 def add_parser(subparsers: argparse._SubParsersAction) -> None:
@@ -50,33 +49,27 @@ def parse(parser: str, case_id: str) -> int:
     case_file = cases[case_id]["case_file"]
     case = yaml.safe_load(case_file.read_text())
 
+    if parser == "all":
+        # TODO: Implement.
+        return 0
+
     # Load parser module.
-    module = importlib.import_module(parser, "parsers")
-    spec = importlib.util.spec_from_file_location(parser[:-3], config.parsers_folder + parser + ".py")
-    print(spec, file=sys.stderr)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    parser_module = importlib.import_module(parser, "parsers")
 
-    # building command
-    if isinstance(case[module.parser_input], str):
-        command = "module." + module.parser_call + "('" + case[module.parser_input] + "')"
-    else:
-        command = "module." + module.parser_call + "(" + str(case[module.parser_input]) + ")"
+    # Extract parser attributes.
+    parser_call = getattr(parser_module, parser_module.parser_call)
+    input_paths = case[parser_module.parser_input]
+    if not isinstance(input_paths, list):
+        input_paths = [input_paths]
 
-    # running the command, expecting JSON output
-    # try:
-    #    result = eval(command)
-    # except Exception as e:
-    #    print(f'Error trying to parse {case[module.parser_input]}: {str(e)}', file=sys.stderr)
+    # Execute the parser.
+    result = parser_call(*input_paths)
 
-    result = eval(command)
+    # Saving the parser output.
+    output_file = (config.parsed_data_path / case_id / parser).with_suffix(".yaml")
+    output_file.write_text(yaml.safe_dump(result))
 
-    # saving the parser output
-    output_file = config.parsed_data_folder + case_id + "/" + parser + ".json"
-    with open(output_file, "w") as data_file:
-        data_file.write(json.dumps(result, indent=4))
-
-    print(f"Execution success, output saved in: {output_file}", file=sys.stderr)
+    logger.info(f"Execution success, output saved in: {output_file.as_posix():s}")
 
     return 0
 
