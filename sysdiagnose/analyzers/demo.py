@@ -9,12 +9,12 @@ from optparse import OptionParser
 
 version_string = "demo.py v2023-04-28 Version 0.1"
 
-# ----- definition for analyse.py script -----#
+# ----- definition for analyze.py script -----#
 # -----         DO NOT DELETE             ----#
 
-analyser_description = "Do something useful (DEMO)"
-analyser_call = "generate_something"
-analyser_format = "json"
+analyzer_description = "Do something useful (DEMO)"
+analyzer_call = "generate_something"
+analyzer_format = "json"
 
 
 def generate_something(jsondir, filename):

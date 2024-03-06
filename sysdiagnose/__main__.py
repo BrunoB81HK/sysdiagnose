@@ -3,7 +3,7 @@ import signal
 
 from . import __version__
 
-from .analize import add_parser as add_analyse_parser
+from .analize import add_parser as add_analyze_parser
 from .clear import add_parser as add_clear_parser
 from .init import add_parser as add_init_parser
 from .list import add_parser as add_list_parser
@@ -20,7 +20,7 @@ def main() -> None:
 
     # Register command parsers.
     subparsers = main_parser.add_subparsers(title="commands")
-    add_analyse_parser(subparsers)
+    add_analyze_parser(subparsers)
     add_clear_parser(subparsers)
     add_init_parser(subparsers)
     add_list_parser(subparsers)

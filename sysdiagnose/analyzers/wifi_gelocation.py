@@ -17,12 +17,12 @@ from sysdiagnose import config  # noqa: E402
 
 version_string = "demo.py v2023-04-28 Version 0.1"
 
-# ----- definition for analyse.py script -----#
+# ----- definition for analyze.py script -----#
 # -----         DO NOT DELETE             ----#
 
-analyser_description = "Generate GPS Exchange (GPX) of wifi geolocations"
-analyser_call = "generate_gpx"
-analyser_format = "json"
+analyzer_description = "Generate GPS Exchange (GPX) of wifi geolocations"
+analyzer_call = "generate_gpx"
+analyzer_format = "json"
 
 
 def generate_gpx(jsonfile: str, outfile: str = "wifi-geolocations.gpx"):

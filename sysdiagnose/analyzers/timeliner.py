@@ -14,12 +14,12 @@ from optparse import OptionParser
 
 version_string = "timeliner.py v2023-04-05 Version 0.1"
 
-# ----- definition for analyse.py script -----#
+# ----- definition for analyze.py script -----#
 # -----         DO NOT DELETE             ----#
 
-analyser_description = "Generate a Timesketch compatible timeline"
-analyser_call = "generate_timeline"
-analyser_format = "jsonl"
+analyzer_description = "Generate a Timesketch compatible timeline"
+analyzer_call = "generate_timeline"
+analyzer_format = "jsonl"
 
 # Structure:
 # filename : parsing_function

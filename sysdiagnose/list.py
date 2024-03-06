@@ -20,7 +20,7 @@ def add_parser(subparsers: argparse._SubParsersAction) -> None:
         choices=[
             "cases",
             "parsers",
-            "analysers",
+            "analyzers",
         ],
         help="the item to list",
     )
@@ -32,10 +32,10 @@ def main(args: argparse.Namespace) -> int:
         return list_cases()
     elif args.item == "parsers":
         return list_parsers()
-    elif args.item == "analysers":
-        return list_analysers()
+    elif args.item == "analyzers":
+        return list_analyzers()
 
-    logger.error(f"'{args.item:s}' is not a valid item to list. {{ cases | parsers | analysers }}")
+    logger.error(f"'{args.item:s}' is not a valid item to list. {{ cases | parsers | analyzers }}")
     return 1
 
 
@@ -74,19 +74,19 @@ def list_parsers() -> int:
     return 0
 
 
-def list_analysers() -> int:
+def list_analyzers() -> int:
     headers = ("Name", "Description")
     lines = []
 
     # os.chdir(folder)
     # modules = glob.glob(os.path.join(os.path.dirname("."), "*.py"))
     # lines = []
-    # for analyser in modules:
+    # for analyzer in modules:
     #    try:
-    #        spec = importlib.util.spec_from_file_location(analyser[:-3], analyser)
+    #        spec = importlib.util.spec_from_file_location(analyzer[:-3], analyzer)
     #        module = importlib.util.module_from_spec(spec)
     #        spec.loader.exec_module(module)
-    #        line = [analyser[:-3], module.analyser_description]
+    #        line = [analyzer[:-3], module.analyzer_description]
     #        lines.append(line)
     #    except:  # noqa: E722
     #        continue

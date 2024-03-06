@@ -3,7 +3,7 @@
 # For Python3
 # Author: Emiliern Le Jamtel
 
-"""Apps analyser.
+"""Apps analyzer.
 
 Usage:
   apps.py -i <logfolder>
@@ -14,6 +14,7 @@ Options:
   -h --help     Show this screen.
   -v --version     Show version.
 """
+
 import os
 
 # from optparse import OptionParser
@@ -24,12 +25,12 @@ from docopt import docopt
 
 version_string = "demo.py v2023-04-28 Version 0.1"
 
-# ----- definition for analyse.py script -----#
+# ----- definition for analyze.py script -----#
 # -----         DO NOT DELETE             ----#
 
-analyser_description = "Get list of Apps installed on the device"
-analyser_call = "apps_analysis"
-analyser_format = "md"
+analyzer_description = "Get list of Apps installed on the device"
+analyzer_call = "apps_analysis"
+analyzer_format = "md"
 
 # --------------------------------------------------------------------------- #
 

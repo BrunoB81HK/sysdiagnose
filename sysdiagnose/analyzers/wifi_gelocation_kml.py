@@ -18,12 +18,12 @@ sys.path.append("..")  # noqa: E402
 
 version_string = "wifi_geolocation_kml.py v2023-08-09 Version 0.2"
 
-# ----- definition for analyse.py script -----#
+# ----- definition for analyze.py script -----#
 # -----         DO NOT DELETE             ----#
 
-analyser_description = "Generate KML file for wifi geolocations"
-analyser_call = "generate_kml"
-analyser_format = "json"
+analyzer_description = "Generate KML file for wifi geolocations"
+analyzer_call = "generate_kml"
+analyzer_format = "json"
 
 
 def generate_kml(jsonfile: str, outfile: str = "wifi-geolocations.kml"):

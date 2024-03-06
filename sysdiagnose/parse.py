@@ -1,12 +1,13 @@
 import argparse
 import os
 import sys
-import importlib.util
+import importlib
 import glob
 
 import yaml
 
 from . import config
+from . import utils
 
 
 logger = config.logger.getChild("parse")
@@ -21,26 +22,48 @@ def add_parser(subparsers: argparse._SubParsersAction) -> None:
         "case_id",
         metavar="ID",
         type=str,
-        choices=["a", "b"],
+        choices=utils.get_all_cases(),
         help="the case to parse",
     )
-    parser.add_argument(
-        "parser",
+
+    parser_choice_group = parser.add_argument_group(
+        "parsers choice options",
+        "Options to choose the parser(s) to run. If none is provided, all parsers will be run.",
+    ).add_mutually_exclusive_group()
+    parser_choice_group.add_argument(
+        "parsers",
         type=str,
-        nargs="+",
-        choices=["all", ""],
-        help="the parser(s) to use",
+        nargs="*",
+        default=[],
+        help="the parser(s) to run",
+    ).completer = utils.get_all_parsers
+    parser_choice_group.add_argument(
+        "-a",
+        "--all",
+        action="store_true",
+        help="run all parsers",
     )
+
     parser.set_defaults(func=main)
 
 
 def main(args: argparse.Namespace) -> int:
-    # TODO: Test if case_id and parser is valid
-    return parse(args.parser, args.case_id)
+    if args.all or not args.parsers:
+        return parse(args.case_id)
+    return parse(args.case_id, args.parsers)
 
 
-def parse(parser: str, case_id: str) -> int:
+def parse(case_id: str, parsers: list[str] = None) -> int:
     logger.info(f"Processing case '{case_id:s}'...")
+
+    if parsers is None:
+        parsers = utils.get_all_parsers()
+
+    # Check if the parsers are valid.
+    invalid_parsers = [parser for parser in parsers if parser not in utils.get_all_parsers()]
+    if invalid_parsers:
+        logger.error(f"Invalid parser(s): [ {', '.join(invalid_parsers):s} ].")
+        return 1
 
     # Open the cases file.
     cases = yaml.safe_load(config.cases_file.read_text())["cases"]
@@ -49,27 +72,26 @@ def parse(parser: str, case_id: str) -> int:
     case_file = cases[case_id]["case_file"]
     case = yaml.safe_load(case_file.read_text())
 
-    if parser == "all":
-        # TODO: Implement.
-        return 0
+    for parser in parsers:
+        logger.info(f"Running parser '{parser:s}'...")
 
-    # Load parser module.
-    parser_module = importlib.import_module(parser, "parsers")
+        # Load parser module.
+        parser_module = importlib.import_module(parser, "parsers")
 
-    # Extract parser attributes.
-    parser_call = getattr(parser_module, parser_module.parser_call)
-    input_paths = case[parser_module.parser_input]
-    if not isinstance(input_paths, list):
-        input_paths = [input_paths]
+        # Extract parser attributes.
+        parser_call = getattr(parser_module, parser_module.parser_call)
+        input_paths = case[parser_module.parser_input]
+        if not isinstance(input_paths, list):
+            input_paths = [input_paths]
 
-    # Execute the parser.
-    result = parser_call(*input_paths)
+        # Execute the parser.
+        result = parser_call(*input_paths)
 
-    # Saving the parser output.
-    output_file = (config.parsed_data_path / case_id / parser).with_suffix(".yaml")
-    output_file.write_text(yaml.safe_dump(result))
+        # Saving the parser output.
+        output_file = (config.parsed_data_path / case_id / parser).with_suffix(".yaml")
+        output_file.write_text(yaml.safe_dump(result))
 
-    logger.info(f"Execution success, output saved in: {output_file.as_posix():s}")
+        logger.info(f"Execution success, output saved in: {output_file.as_posix():s}")
 
     return 0
 
