@@ -1,23 +1,19 @@
 import argparse
-import importlib
 
-from . import config
-from . import utils
+from .. import analyzers
 
 
-logger = config.logger.getChild("analyze")
-
-
-def add_parser(subparsers: argparse._SubParsersAction) -> None:
+def add_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
     parser = subparsers.add_parser(
         "analyze",
         help="Analyze the results produced by parsers.",
     )
+
     parser.add_argument(
         "case_id",
         metavar="ID",
         type=str,
-        choices=["a", "b"],
+        choices=["a", "b"],  # TODO: Add choices dynamically.
         help="the case to analyze",
     )
 
@@ -31,15 +27,17 @@ def add_parser(subparsers: argparse._SubParsersAction) -> None:
         nargs="*",
         default=[],
         help="the analyzer(s) to run",
-    ).completer = utils.get_all_analyzers
+    ).completer = analyzers.get_all_analyzers
     analyzer_choice_group.add_argument(
         "-a",
         "--all",
         action="store_true",
-        help="run all parsers",
+        help="run all analyzers",
     )
 
     parser.set_defaults(func=main)
+
+    return parser
 
 
 def main(args: argparse.Namespace) -> int:
@@ -49,13 +47,22 @@ def main(args: argparse.Namespace) -> int:
 
 
 def analyze(case_id: str, analyzers: list[str] = None) -> int:
+    # Import the related modules.
+    import importlib
+
+    from ..utils import logging
+    from ..utils import paths
+
+    # Get the logger.
+    logger = logging.get_logger()
+
     logger.info(f"Processing case '{case_id:s}'...")
 
     if analyzers is None:
-        analyzers = utils.get_all_analyzers()
+        analyzers = analyzers.get_all_analyzers()
 
     # Check if the analyzers are valid.
-    invalid_analyzers = [analyzer for analyzer in analyzers if analyzer not in utils.get_all_analyzers()]
+    invalid_analyzers = [analyzer for analyzer in analyzers if analyzer not in analyzers.get_all_analyzers()]
     if invalid_analyzers:
         logger.error(f"Invalid analyzer(s): [ {', '.join(invalid_analyzers):s} ].")
         return 1
@@ -69,7 +76,7 @@ def analyze(case_id: str, analyzers: list[str] = None) -> int:
         # Extract analyzer attributes.
         analyzer_call = getattr(analyzer_module, analyzer_module.analyzer_call)
         output_format = "." + analyzer_module.analyzer_format
-        parsed_data_path = config.parsed_data_path / case_id
+        parsed_data_path = paths.parsed_data_path / case_id
         output_file = (parsed_data_path / analyzer).with_suffix(output_format)
 
         # Execute the analyzer.

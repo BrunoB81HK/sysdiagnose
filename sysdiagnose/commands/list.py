@@ -1,19 +1,12 @@
 import argparse
 
-import tabulate
-import yaml
 
-from . import config
-
-
-logger = config.logger.getChild("list")
-
-
-def add_parser(subparsers: argparse._SubParsersAction) -> None:
+def add_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
     parser = subparsers.add_parser(
         "list",
         help="List the cases, parsers or analizers of the project.",
     )
+
     parser.add_argument(
         "item",
         type=str,
@@ -24,10 +17,19 @@ def add_parser(subparsers: argparse._SubParsersAction) -> None:
         ],
         help="the item to list",
     )
+
     parser.set_defaults(func=main)
+
+    return parser
 
 
 def main(args: argparse.Namespace) -> int:
+    # Import the related modules.
+    from ..utils import logging
+
+    # Get the logger.
+    logger = logging.get_logger()
+
     if args.item == "cases":
         return list_cases()
     elif args.item == "parsers":
@@ -40,9 +42,14 @@ def main(args: argparse.Namespace) -> int:
 
 
 def list_cases() -> int:
+    import tabulate
+
+    from ..utils import paths
+    from ..utils import yaml
+
     headers = ("ID", "Source file", "SHA256")
 
-    cases = yaml.safe_load(config.cases_file.read_text())["cases"]
+    cases = yaml.load(paths.cases_file)["cases"]
     lines = [(case_id, case_info["source_file"], case_info["source_sha256"]) for case_id, case_info in cases.items()]
 
     print(tabulate.tabulate(lines, headers=headers))
@@ -50,6 +57,8 @@ def list_cases() -> int:
 
 
 def list_parsers() -> int:
+    import tabulate
+
     headers = ("Name", "Description", "Input")
     lines = []
 
@@ -75,6 +84,8 @@ def list_parsers() -> int:
 
 
 def list_analyzers() -> int:
+    import tabulate
+
     headers = ("Name", "Description")
     lines = []
 

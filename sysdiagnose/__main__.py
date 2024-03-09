@@ -1,13 +1,7 @@
 import argparse
 import signal
 
-from . import __version__
-
-from .analize import add_parser as add_analyze_parser
-from .clear import add_parser as add_clear_parser
-from .init import add_parser as add_init_parser
-from .list import add_parser as add_list_parser
-from .parse import add_parser as add_parse_parser
+from . import commands
 
 
 def main() -> None:
@@ -16,15 +10,10 @@ def main() -> None:
         prog="sysdiagnose",
         description="Forensic toolkit for iOS sysdiagnose feature.",
     )
-    main_parser.add_argument("-v", "--version", action="version", version=__version__)
+    commands.add_version_argument(main_parser)
 
-    # Register command parsers.
-    subparsers = main_parser.add_subparsers(title="commands")
-    add_analyze_parser(subparsers)
-    add_clear_parser(subparsers)
-    add_init_parser(subparsers)
-    add_list_parser(subparsers)
-    add_parse_parser(subparsers)
+    # Register the commands parsers.
+    commands.add_command_parsers(main_parser)
 
     # Register the autocomplete.
     try:
@@ -44,3 +33,9 @@ def main() -> None:
     except RuntimeError as e:
         ret_code = str(e)
     return ret_code
+
+
+if __name__ == "__main__":
+    import sys
+
+    sys.exit(main())

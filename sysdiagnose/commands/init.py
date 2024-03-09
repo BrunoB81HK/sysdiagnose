@@ -1,15 +1,6 @@
 import argparse
-import hashlib
 import pathlib
-import re
-import tarfile
 
-import yaml
-
-from . import config
-
-
-logger = config.logger.getChild("init")
 
 __sysdiagnose_archive_glob_file_map = {
     "sysdiagnose.log": "./*/sysdiagnose.log",
@@ -34,34 +25,53 @@ __sysdiagnose_archive_glob_file_map = {
 }
 
 
-def add_parser(subparsers: argparse._SubParsersAction) -> None:
+def add_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
     parser = subparsers.add_parser(
         "init",
         help="Initialize a sysdiagnose analysis.",
     )
+
     parser.add_argument(
         "file",
         metavar="SYSDIAGNOSE_FILE",
         type=pathlib.Path,
         help="the sysdiagnose archive file",
     )
-    parser.add_argument("-f", "--force", action="store_true", help="force the re-initialization")
+    parser.add_argument(
+        "-f",
+        "--force",
+        action="store_true",
+        help="force the re-initialization",
+    )
+
     parser.set_defaults(func=main)
+
+    return parser
 
 
 def main(args: argparse.Namespace) -> int:
-    if not args.file.exists():
-        logger.error(f"'{args.file.as_posix()}' not found")
-        return 1
-
     return init(args.file, args.force)
 
 
 def init(sysdiagnose_file: pathlib.Path, force: bool) -> int:
-    logger.info(f"Processing {sysdiagnose_file.as_posix():s}...")
+    # Import the related modules.
+    import hashlib
+    import re
+    import tarfile
 
-    # Open the cases file.
-    cases = yaml.safe_load(config.cases_file.read_text())["cases"]
+    from ..utils import logging
+    from ..utils import paths
+    from ..utils import yaml
+
+    # Get the logger.
+    logger = logging.get_logger()
+
+    # Ensure that the sysdiagnosis file exist.
+    if not sysdiagnose_file.exists():
+        logger.error(f"'{sysdiagnose_file.file.as_posix()}' not found")
+        return 1
+
+    logger.info(f"Processing {sysdiagnose_file.as_posix():s}...")
 
     # Calculate sha256 of sysdiagnose archive and compare with past cases.
     file_bytes = sysdiagnose_file.read_bytes()
@@ -69,6 +79,9 @@ def init(sysdiagnose_file: pathlib.Path, force: bool) -> int:
     case_id = readable_hash[:8]
     logger.debug(f"hash: {readable_hash:s}")
     logger.debug(f"case id: {case_id:s}")
+
+    # Open the cases file.
+    cases = yaml.load(paths.cases_file)["cases"]
 
     if case_id in cases and not force:
         logger.error(
@@ -85,8 +98,8 @@ def init(sysdiagnose_file: pathlib.Path, force: bool) -> int:
         return 1
 
     # Create case folders and file.
-    new_data_folder = config.data_path / case_id
-    new_parsed_folder = config.parsed_data_path / case_id
+    new_data_folder = paths.data_path / case_id
+    new_parsed_folder = paths.parsed_data_path / case_id
     case_file = new_data_folder.with_suffix(".yaml")
     new_data_folder.mkdir(parents=True, exist_ok=True)
     new_parsed_folder.mkdir(parents=True, exist_ok=True)
@@ -104,43 +117,42 @@ def init(sysdiagnose_file: pathlib.Path, force: bool) -> int:
     except Exception as e:
         logger.error(f"Error while decompressing sysdiagnose file. (reason: {e:s})")
 
-    # Create case json file.
-    new_case_json = {key: next(new_data_folder.glob(glb), None) for key, glb in __sysdiagnose_archive_glob_file_map.items()}
+    # Create new case data.
+    new_case_data = {key: next(new_data_folder.glob(glb), None) for key, glb in __sysdiagnose_archive_glob_file_map.items()}
 
     # Wifi data listing.
-    new_case_json["wifi_data"] = [
+    new_case_data["wifi_data"] = [
         *new_data_folder.glob("./*/WiFi/*.plist"),
         *new_data_folder.glob("./*/WiFi/wifi_scan*.txt"),
         *new_data_folder.glob("./*/WiFi/com.apple.wifi.recent-networks.json"),
     ]
 
     # ips files.
-    new_case_json["ips_files"] = list(new_data_folder.glob("./*/crashes_and_spins/*.ips"))
+    new_case_data["ips_files"] = list(new_data_folder.glob("./*/crashes_and_spins/*.ips"))
 
     # mobile activation logs.
-    new_case_json["mobile_activation"] = list(new_data_folder.glob("./*/logs/MobileActivation/mobileactivationd.log*"))
+    new_case_data["mobile_activation"] = list(new_data_folder.glob("./*/logs/MobileActivation/mobileactivationd.log*"))
 
     # container manager.
-    new_case_json["container_manager"] = list(new_data_folder.glob("./*/logs/MobileContainerManager/containermanagerd.log*"))
+    new_case_data["container_manager"] = list(new_data_folder.glob("./*/logs/MobileContainerManager/containermanagerd.log*"))
 
     # mobile installation.
-    new_case_json["mobile_installation"] = list(new_data_folder.glob("./*/logs/MobileInstallation/mobile_installation.log*"))
+    new_case_data["mobile_installation"] = list(new_data_folder.glob("./*/logs/MobileInstallation/mobile_installation.log*"))
 
     # Get iOS version
     if ret := re.search(
         r"iPhone OS (\d+\.\d+\.\d+)",
-        new_case_json["sysdiagnose.log"].read_text(),
+        new_case_data["sysdiagnose.log"].read_text(),
     ):
-        new_case_json["ios_version"] = ret.group(1)
+        new_case_data["ios_version"] = ret.group(1)
     else:
         logger.error("Could not retrieve the iOS version...")
         # return 1
 
     # Sve the new case file.
-    case_file.write_text(yaml.safe_dump(new_case_json))
+    yaml.dump(new_case_data, case_file)
 
     # Update cases file.
-    config.cases_file.write_text(yaml.safe_dump({"cases": cases}))
+    yaml.dump({"cases": cases}, paths.cases_file)
 
-    logger.info("Sysdiagnose file has been processed.")
-    logger.info(f"New case id: {case_id:s}")
+    logger.info(f"Sysdiagnose file (id: {case_id:s}) has been processed.")
