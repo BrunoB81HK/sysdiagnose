@@ -59,6 +59,9 @@ venv/
 # PyCharm project settings
 .idea/
 
+# VSCode project settings
+.vscode/
+
 # Temporary files
 *.tmp
 *.swp

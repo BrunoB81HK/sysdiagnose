@@ -1,20 +1,3 @@
-#! /usr/bin/env python3
-
-# For Python3
-# Author: Emiliern Le Jamtel
-
-"""Apps analyzer.
-
-Usage:
-  apps.py -i <logfolder>
-  apps.py (-h | --help)
-  apps.py --version
-
-Options:
-  -h --help     Show this screen.
-  -v --version     Show version.
-"""
-
 import os
 
 # from optparse import OptionParser
@@ -28,8 +11,7 @@ version_string = "demo.py v2023-04-28 Version 0.1"
 # ----- definition for analyze.py script -----#
 # -----         DO NOT DELETE             ----#
 
-analyzer_description = "Get list of Apps installed on the device"
-analyzer_call = "apps_analysis"
+analyzer_description = "Get list of Apps installed on the device."
 analyzer_format = "md"
 
 # --------------------------------------------------------------------------- #

@@ -2,29 +2,6 @@ import argparse
 import pathlib
 
 
-__sysdiagnose_archive_glob_file_map = {
-    "sysdiagnose.log": "./*/sysdiagnose.log",
-    "ps": "./*/ps.txt",
-    "swcutil_show": "./*/swcutil_show.txt",
-    "ps_thread": "./*/ps_thread.txt",
-    "appupdate_db": "./*/logs/appinstallation/AppUpdates.sqlitedb",
-    "brctl": "./*/brctl/",
-    "networkextensioncache": "./*/logs/Networking/com.apple.networkextension.cache.plist",
-    "networkextension": "./*/logs/Networking/com.apple.networkextension.plist",
-    "powerlogs": "./*/logs/powerlogs/powerlog_*",
-    "systemversion": "./*/logs/SystemVersion/SystemVersion.plist",
-    "UUIDToBinaryLocations": "./*/logs/tailspindb/UUIDToBinaryLocations",
-    "logarchive_folder": "./*/system_logs.logarchive/",
-    "shutdownlog": "./*/system_logs.logarchive/Extra/shutdown.log",
-    "taskinfo": "./*/taskinfo.txt",
-    "spindump-nosymbols": "./*/spindump-nosymbols.txt",
-    "Accessibility-TCC": "./*/logs/Accessibility/TCC.db",
-    "appinstallation": "./*/logs/appinstallation/appstored.sqlitedb",
-    "itunesstore": "./*/./logs/itunesstored/downloads.*.sqlitedb",
-    "wifisecurity": "./*/WiFi/security.txt",
-}
-
-
 def add_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
     parser = subparsers.add_parser(
         "init",
@@ -59,9 +36,9 @@ def init(sysdiagnose_file: pathlib.Path, force: bool) -> int:
     import re
     import tarfile
 
-    from ..utils import logging
-    from ..utils import paths
-    from ..utils import yaml
+    from sysdiagnose.utils import logging
+    from sysdiagnose.utils import paths
+    from sysdiagnose.utils import yaml
 
     # Get the logger.
     logger = logging.get_logger()
@@ -116,6 +93,28 @@ def init(sysdiagnose_file: pathlib.Path, force: bool) -> int:
         tf.extractall(new_data_folder)
     except Exception as e:
         logger.error(f"Error while decompressing sysdiagnose file. (reason: {e:s})")
+
+    __sysdiagnose_archive_glob_file_map = {
+        "sysdiagnose.log": "./*/sysdiagnose.log",
+        "ps": "./*/ps.txt",
+        "swcutil_show": "./*/swcutil_show.txt",
+        "ps_thread": "./*/ps_thread.txt",
+        "appupdate_db": "./*/logs/appinstallation/AppUpdates.sqlitedb",
+        "brctl": "./*/brctl/",
+        "networkextensioncache": "./*/logs/Networking/com.apple.networkextension.cache.plist",
+        "networkextension": "./*/logs/Networking/com.apple.networkextension.plist",
+        "powerlogs": "./*/logs/powerlogs/powerlog_*",
+        "systemversion": "./*/logs/SystemVersion/SystemVersion.plist",
+        "UUIDToBinaryLocations": "./*/logs/tailspindb/UUIDToBinaryLocations",
+        "logarchive_folder": "./*/system_logs.logarchive/",
+        "shutdownlog": "./*/system_logs.logarchive/Extra/shutdown.log",
+        "taskinfo": "./*/taskinfo.txt",
+        "spindump-nosymbols": "./*/spindump-nosymbols.txt",
+        "Accessibility-TCC": "./*/logs/Accessibility/TCC.db",
+        "appinstallation": "./*/logs/appinstallation/appstored.sqlitedb",
+        "itunesstore": "./*/./logs/itunesstored/downloads.*.sqlitedb",
+        "wifisecurity": "./*/WiFi/security.txt",
+    }
 
     # Create new case data.
     new_case_data = {key: next(new_data_folder.glob(glb), None) for key, glb in __sysdiagnose_archive_glob_file_map.items()}

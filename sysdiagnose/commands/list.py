@@ -17,6 +17,12 @@ def add_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParse
         ],
         help="the item to list",
     )
+    parser.add_argument(
+        "-n",
+        "--names",
+        action="store_true",
+        help="list only the names",
+    )
 
     parser.set_defaults(func=main)
 
@@ -25,82 +31,56 @@ def add_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParse
 
 def main(args: argparse.Namespace) -> int:
     # Import the related modules.
-    from ..utils import logging
+    import tabulate
+
+    from sysdiagnose.utils import logging
 
     # Get the logger.
     logger = logging.get_logger()
 
-    if args.item == "cases":
-        return list_cases()
-    elif args.item == "parsers":
-        return list_parsers()
-    elif args.item == "analyzers":
-        return list_analyzers()
+    # Set the item_function_mapping
+    item_function_mapping = {
+        "analyzers": list_analyzers,
+        "cases": list_cases,
+        "parsers": list_parsers,
+    }
 
-    logger.error(f"'{args.item:s}' is not a valid item to list. {{ cases | parsers | analyzers }}")
-    return 1
+    if args.item not in item_function_mapping:
+        logger.error(f"'{args.item:s}' is not a valid item to list. {{ analyzers | cases | parsers }}")
+        return 1
 
+    headers, lines, names = item_function_mapping[args.item]()
 
-def list_cases() -> int:
-    import tabulate
+    if args.names:
+        print("\n".join(names))
+    else:
+        print(tabulate.tabulate(lines, headers=headers))
 
-    from ..utils import paths
-    from ..utils import yaml
-
-    headers = ("ID", "Source file", "SHA256")
-
-    cases = yaml.load(paths.cases_file)["cases"]
-    lines = [(case_id, case_info["source_file"], case_info["source_sha256"]) for case_id, case_info in cases.items()]
-
-    print(tabulate.tabulate(lines, headers=headers))
     return 0
 
 
-def list_parsers() -> int:
-    import tabulate
-
-    headers = ("Name", "Description", "Input")
-    lines = []
-
-    # from . import parsers
-    #
-    # lines = [parser for parser in parsers.__all__]
-    #
-    # os.chdir(folder)
-    # modules = glob.glob(os.path.join(os.path.dirname("."), "*.py"))
-    # lines = []
-    # for parser in modules:
-    #    try:
-    #        spec = importlib.util.spec_from_file_location(parser[:-3], parser)
-    #        module = importlib.util.module_from_spec(spec)
-    #        spec.loader.exec_module(module)
-    #        line = [parser[:-3], module.parser_description, module.parser_input]
-    #        lines.append(line)
-    #    except:  # noqa: E722
-    #        continue
-
-    print(tabulate.tabulate(lines, headers=headers))
-    return 0
-
-
-def list_analyzers() -> int:
-    import tabulate
+def list_analyzers() -> tuple[tuple[str, ...], tuple[str, ...], list[str]]:
+    from sysdiagnose.utils import info
 
     headers = ("Name", "Description")
-    lines = []
+    lines = [(analyzer, analyzer_info["descritpion"]) for analyzer, analyzer_info in info.get_all_analyzers().items()]
 
-    # os.chdir(folder)
-    # modules = glob.glob(os.path.join(os.path.dirname("."), "*.py"))
-    # lines = []
-    # for analyzer in modules:
-    #    try:
-    #        spec = importlib.util.spec_from_file_location(analyzer[:-3], analyzer)
-    #        module = importlib.util.module_from_spec(spec)
-    #        spec.loader.exec_module(module)
-    #        line = [analyzer[:-3], module.analyzer_description]
-    #        lines.append(line)
-    #    except:  # noqa: E722
-    #        continue
+    return headers, lines, info.all_analyzers
 
-    print(tabulate.tabulate(lines, headers=headers))
-    return 0
+
+def list_cases() -> tuple[tuple[str, ...], tuple[str, ...], list[str]]:
+    from sysdiagnose.utils import info
+
+    headers = ("ID", "Source file", "SHA256")
+    lines = [(case_id, case_info["source_file"], case_info["source_sha256"]) for case_id, case_info in info.get_all_cases().items()]
+
+    return headers, lines, info.all_cases
+
+
+def list_parsers() -> tuple[tuple[str, ...], tuple[str, ...], list[str]]:
+    from sysdiagnose.utils import info
+
+    headers = ("Name", "Description", "Input")
+    lines = [(parser, parser_info["description"], parser_info["input"]) for parser, parser_info in info.get_all_parsers().items()]
+
+    return headers, lines, info.all_parsers

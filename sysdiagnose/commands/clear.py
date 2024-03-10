@@ -41,8 +41,8 @@ def clear(clear_app_cache: bool) -> int:
     # Import the related modules.
     import shutil
 
-    from ..utils import logging
-    from ..utils import paths
+    from sysdiagnose.utils import logging
+    from sysdiagnose.utils import paths
 
     # Get the logger.
     logger = logging.get_logger()

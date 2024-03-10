@@ -1,6 +1,10 @@
 import argparse
 
-from .. import parsers
+from sysdiagnose.utils import info
+
+
+def parsers_completer(prefix: str, parsed_args: argparse.Namespace, **kwargs) -> list[str]:
+    return [parser for parser in info.all_parsers if parser not in parsed_args.parser]
 
 
 def add_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
@@ -13,7 +17,7 @@ def add_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParse
         "case_id",
         metavar="ID",
         type=str,
-        choices=["a", "b"],  # TODO: Add choices dynamically.
+        choices=info.all_cases,
         help="the case to parse",
     )
 
@@ -27,7 +31,7 @@ def add_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParse
         nargs="*",
         default=[],
         help="the parser(s) to run",
-    ).completer = parsers.get_all_parsers
+    ).completer = parsers_completer
     parser_choice_group.add_argument(
         "-a",
         "--all",
@@ -50,9 +54,9 @@ def parse(case_id: str, parsers: list[str] = None) -> int:
     # Import the related modules.
     import importlib
 
-    from ..utils import logging
-    from ..utils import paths
-    from ..utils import yaml
+    from sysdiagnose.utils import logging
+    from sysdiagnose.utils import paths
+    from sysdiagnose.utils import yaml
 
     # Get the logger.
     logger = logging.get_logger()
@@ -60,10 +64,10 @@ def parse(case_id: str, parsers: list[str] = None) -> int:
     logger.info(f"Processing case '{case_id:s}'...")
 
     if parsers is None:
-        parsers = parsers.get_all_parsers()
+        parsers = info.all_parsers
 
     # Check if the parsers are valid.
-    invalid_parsers = [parser for parser in parsers if parser not in parsers.get_all_parsers()]
+    invalid_parsers = [parser for parser in parsers if parser not in info.all_parsers]
     if invalid_parsers:
         logger.error(f"Invalid parser(s): [ {', '.join(invalid_parsers):s} ].")
         return 1
@@ -78,17 +82,20 @@ def parse(case_id: str, parsers: list[str] = None) -> int:
     for parser in parsers:
         logger.info(f"Running parser '{parser:s}'...")
 
-        # Load parser module.
-        parser_module = importlib.import_module(parser, "parsers")
+        # Load the parser module.
+        parser_module = importlib.import_module(f"sysdiagnose.parsers.{parser:s}")
 
         # Extract parser attributes.
-        parser_call = getattr(parser_module, parser_module.parser_call)
         input_paths = case[parser_module.parser_input]
         if not isinstance(input_paths, list):
             input_paths = [input_paths]
 
         # Execute the parser.
-        result = parser_call(*input_paths)
+        result = parser_module.main(*input_paths)
+
+        if result is None:
+            logger.error("Execution failed.")
+            return 1
 
         # Saving the parser output.
         output_file = (paths.parsed_data_path / case_id / parser).with_suffix(".yaml")

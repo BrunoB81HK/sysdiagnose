@@ -1,6 +1,10 @@
 import argparse
 
-from .. import analyzers
+from sysdiagnose.utils import info
+
+
+def analyzers_completer(prefix: str, parsed_args: argparse.Namespace, **kwargs) -> list[str]:
+    return [analyzer for analyzer in info.all_analyzers if analyzer not in parsed_args.analyzers]
 
 
 def add_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParser:
@@ -13,7 +17,7 @@ def add_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParse
         "case_id",
         metavar="ID",
         type=str,
-        choices=["a", "b"],  # TODO: Add choices dynamically.
+        choices=info.all_cases,
         help="the case to analyze",
     )
 
@@ -27,7 +31,7 @@ def add_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParse
         nargs="*",
         default=[],
         help="the analyzer(s) to run",
-    ).completer = analyzers.get_all_analyzers
+    ).completer = analyzers_completer
     analyzer_choice_group.add_argument(
         "-a",
         "--all",
@@ -48,10 +52,10 @@ def main(args: argparse.Namespace) -> int:
 
 def analyze(case_id: str, analyzers: list[str] = None) -> int:
     # Import the related modules.
-    import importlib
+    import importlib.util
 
-    from ..utils import logging
-    from ..utils import paths
+    from sysdiagnose.utils import logging
+    from sysdiagnose.utils import paths
 
     # Get the logger.
     logger = logging.get_logger()
@@ -59,16 +63,16 @@ def analyze(case_id: str, analyzers: list[str] = None) -> int:
     logger.info(f"Processing case '{case_id:s}'...")
 
     if analyzers is None:
-        analyzers = analyzers.get_all_analyzers()
+        analyzers = info.all_analyzers
 
-    # Check if the analyzers are valid.
-    invalid_analyzers = [analyzer for analyzer in analyzers if analyzer not in analyzers.get_all_analyzers()]
-    if invalid_analyzers:
+    # Check if all the analyzers are valid.
+    invalid_analyzers = filter(lambda a: a not in info.all_analyzers, analyzers)
+    if len(invalid_analyzers) > 0:
         logger.error(f"Invalid analyzer(s): [ {', '.join(invalid_analyzers):s} ].")
         return 1
 
-    for analyzer in analyzers:
-        logger.info(f"Running analyzer '{analyzer:s}'...")
+    for i, analyzer in enumerate(analyzers):
+        logger.info(f"[{i+1:d}/{len(analyzers):d}] Running analyzer '{analyzer:s}'...")
 
         # Load analyzer module.
         analyzer_module = importlib.import_module(analyzer, "analyzers")
