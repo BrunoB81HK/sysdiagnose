@@ -39,6 +39,14 @@ def add_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParse
         help="run all parsers",
     )
 
+    parser.add_argument(
+        "-i",
+        "--ignore",
+        "--ignore-errors",
+        action="store_true",
+        help="do not stop if a parser fails",
+    )
+
     parser.set_defaults(func=main)
 
     return parser
@@ -46,16 +54,17 @@ def add_parser(subparsers: argparse._SubParsersAction) -> argparse.ArgumentParse
 
 def main(args: argparse.Namespace) -> int:
     if args.all or not args.parsers:
-        return parse(args.case_id)
-    return parse(args.case_id, args.parsers)
+        return parse(args.case_id, ignore_errors=args.ignore)
+    return parse(args.case_id, args.parsers, ignore_errors=args.ignore)
 
 
-def parse(case_id: str, parsers: list[str] = None) -> int:
+def parse(case_id: str, parsers: list[str] = None, ignore_errors: bool = False) -> int:
     # Import the related modules.
     import importlib
 
     from sysdiagnose.utils import logging
     from sysdiagnose.utils import paths
+    from sysdiagnose.utils import version
     from sysdiagnose.utils import yaml
 
     # Get the logger.
@@ -70,7 +79,11 @@ def parse(case_id: str, parsers: list[str] = None) -> int:
     invalid_parsers = [parser for parser in parsers if parser not in info.all_parsers]
     if invalid_parsers:
         logger.error(f"Invalid parser(s): [ {', '.join(invalid_parsers):s} ].")
-        return 1
+        if not ignore_errors:
+            return 1
+
+        for invalid_parser in invalid_parsers:
+            parsers.remove(invalid_parser)
 
     # Open the cases file.
     cases = yaml.load(paths.cases_file)["cases"]
@@ -78,6 +91,7 @@ def parse(case_id: str, parsers: list[str] = None) -> int:
     # Load the case file.
     case_file = cases[case_id]["case_file"]
     case = yaml.load(case_file)
+    ios_version = version.Version.parse(case["ios_version"])
 
     for parser in parsers:
         logger.info(f"Running parser '{parser:s}'...")
@@ -86,15 +100,24 @@ def parse(case_id: str, parsers: list[str] = None) -> int:
         parser_module = importlib.import_module(f"sysdiagnose.parsers.{parser:s}")
 
         # Extract parser attributes.
-        input_paths = case[parser_module.parser_input]
+        input_paths = case.get(parser_module.parser_input)
+
+        if input_paths is None:
+            logger.error("Parser input '{parser_module.parser_input:s}' is not available.")
+            if ignore_errors:
+                continue
+            return 1
+
         if not isinstance(input_paths, list):
             input_paths = [input_paths]
 
         # Execute the parser.
-        result = parser_module.main(*input_paths)
+        result = parser_module.main(*input_paths, ios_version=ios_version)
 
         if result is None:
             logger.error("Execution failed.")
+            if ignore_errors:
+                continue
             return 1
 
         # Saving the parser output.

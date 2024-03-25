@@ -1,3 +1,7 @@
+"""
+Module with functions to handle sqlite databases.
+"""
+
 import pathlib
 import sqlite3
 
@@ -8,7 +12,7 @@ def __validate_value(value: object) -> str | int | float | bool:
     return value
 
 
-def sqlite2dict(filepath: pathlib.Path) -> None | dict:
+def load_db(filepath: pathlib.Path) -> None | dict:
     try:
         with sqlite3.connect(filepath) as database_con:
             cursor = database_con.cursor()

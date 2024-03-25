@@ -23,12 +23,13 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
 ]
 dependencies = [
-    "argcomplete",
-    "graphviz==0.20.1",
+    "argcomplete==3.2.2",
+    "semver==3.0.2",
     "tabulate==0.9.0",
+    "pyyaml==6.0.1",
+    "graphviz==0.20.1",
     "biplist==1.0.3",
     "python-dateutil==2.8.2",
-    "pyyaml==6.0.1",
 ]
 
 [project.urls]

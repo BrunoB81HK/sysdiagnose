@@ -1,3 +1,7 @@
+"""
+Module with the sysdiagnose package paths.
+"""
+
 import pathlib
 
 __all__ = (

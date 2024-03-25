@@ -1,3 +1,7 @@
+"""
+Module with functions to handle logging.
+"""
+
 import inspect
 import logging
 import pathlib
@@ -20,7 +24,7 @@ class CustomFormatter(logging.Formatter):
 __main_logger = logging.getLogger("sysdiagnose")
 __main_logger.setLevel(logging.DEBUG)
 
-file_formatter = logging.Formatter("[%(asctime)s] - [%(levelname)s] - [%(name)s]: %(message)s")
+file_formatter = logging.Formatter("[%(asctime)s] [%(levelname)s] [%(name)s]: %(message)s")
 
 file_handler = logging.FileHandler(log_file)
 file_handler.setLevel(logging.DEBUG)

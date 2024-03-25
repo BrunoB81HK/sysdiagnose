@@ -38,6 +38,7 @@ def init(sysdiagnose_file: pathlib.Path, force: bool) -> int:
 
     from sysdiagnose.utils import logging
     from sysdiagnose.utils import paths
+    from sysdiagnose.utils import version
     from sysdiagnose.utils import yaml
 
     # Get the logger.
@@ -143,12 +144,12 @@ def init(sysdiagnose_file: pathlib.Path, force: bool) -> int:
         r"iPhone OS (\d+\.\d+\.\d+)",
         new_case_data["sysdiagnose.log"].read_text(),
     ):
-        new_case_data["ios_version"] = ret.group(1)
+        new_case_data["ios_version"] = version.get_version(ret.group(1))
     else:
         logger.error("Could not retrieve the iOS version...")
         # return 1
 
-    # Sve the new case file.
+    # Save the new case file.
     yaml.dump(new_case_data, case_file)
 
     # Update cases file.

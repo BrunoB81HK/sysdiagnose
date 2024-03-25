@@ -1,3 +1,7 @@
+"""
+Module with functions to get informations about the sysdiagnose package.
+"""
+
 import importlib
 import pathlib
 import types
@@ -42,6 +46,7 @@ def get_all_analyzers() -> dict[str]:
         if __validate_module(module, "analyzers"):
             analyzers[analyzer_file.stem] = {
                 "description": module.analyzer_description,
+                "version": module.analyzer_version,
             }
 
     return analyzers
@@ -64,6 +69,7 @@ def get_all_parsers() -> dict[str]:
         if __validate_module(module, "parsers"):
             parsers[parser_file.stem] = {
                 "description": module.parser_description,
+                "version": module.parser_version,
                 "input": module.parser_input,
             }
 

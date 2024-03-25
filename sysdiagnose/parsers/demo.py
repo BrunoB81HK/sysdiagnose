@@ -1,5 +1,5 @@
 """
-Script to print from Accessibility TCC logs
+Demo blank parser.
 Author: david@autopsit.org
 """
 
@@ -10,12 +10,11 @@ from sysdiagnose.utils import version
 # ----- definition for parse command -----#
 # -----         DO NOT DELETE        -----#
 
-parser_description = "Parsing Accessibility TCC logs"
+parser_description = "Demo parser"
 parser_version = "1.0.0"
-parser_input = "Accessibility-TCC"
+parser_input = "demo_input_file"
 
 
 def main(path: pathlib.Path, ios_version: version.Version = version.v13) -> None | dict:
-    from sysdiagnose.utils import sqlite
-
-    return sqlite.load_db(path)
+    dict_object = dict()
+    return dict_object

@@ -62,8 +62,11 @@ def main(args: argparse.Namespace) -> int:
 def list_analyzers() -> tuple[tuple[str, ...], tuple[str, ...], list[str]]:
     from sysdiagnose.utils import info
 
-    headers = ("Name", "Description")
-    lines = [(analyzer, analyzer_info["descritpion"]) for analyzer, analyzer_info in info.get_all_analyzers().items()]
+    headers = ("Name", "Version", "Description")
+    lines = [
+        (analyzer, analyzer_info["version"], analyzer_info["descritpion"])
+        for analyzer, analyzer_info in info.get_all_analyzers().items()
+    ]
 
     return headers, lines, info.all_analyzers
 
@@ -80,7 +83,10 @@ def list_cases() -> tuple[tuple[str, ...], tuple[str, ...], list[str]]:
 def list_parsers() -> tuple[tuple[str, ...], tuple[str, ...], list[str]]:
     from sysdiagnose.utils import info
 
-    headers = ("Name", "Description", "Input")
-    lines = [(parser, parser_info["description"], parser_info["input"]) for parser, parser_info in info.get_all_parsers().items()]
+    headers = ("Name", "Version", "Description", "Input")
+    lines = [
+        (parser, parser_info["version"], parser_info["description"], parser_info["input"])
+        for parser, parser_info in info.get_all_parsers().items()
+    ]
 
     return headers, lines, info.all_parsers
